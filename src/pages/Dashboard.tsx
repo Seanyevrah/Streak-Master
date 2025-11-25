@@ -107,10 +107,12 @@ const Dashboard = () => {
                 <p className="text-xs text-muted-foreground">Competitive Habit Tracking</p>
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <p className="text-sm font-medium">Welcome back!</p>
+            <div className="flex items-center justify-center w-full gap-4">
+              <div className="text-center">
+               {/* <p className="text-sm font-medium">Welcome!</p> */}
               </div>
+            </div>
+            <div className="flex items-center gap-4">    
               <Button variant="ghost" size="sm" onClick={() => setShowSignOutDialog(true)}>
                 <LogOut className="w-4 h-4 mr-2" />
                 Sign Out
