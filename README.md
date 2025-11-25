@@ -108,7 +108,7 @@ Agile was selected for this project because:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/Streak-Master.git
+git clone https://github.com/Seanyevrah/Streak-Master.git
 
 # Move into project directory
 cd Streak-Master
