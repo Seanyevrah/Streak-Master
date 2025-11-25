@@ -108,10 +108,10 @@ Agile was selected for this project because:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/streakmaster.git
+git clone https://github.com/yourusername/Streak-Master.git
 
 # Move into project directory
-cd streakmaster
+cd Streak-Master
 
 # Install dependencies
 npm install
