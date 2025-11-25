@@ -44,7 +44,19 @@ const Auth = () => {
 
       if (error) throw error;
 
-      toast.success("Account created! You can now log in.");
+      // Automatically sign in after signup
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        toast.success("Account created! Please check your email to confirm before signing in.");
+      } else {
+        toast.success("Account created successfully!");
+        navigate("/dashboard");
+      }
+      
       setEmail("");
       setPassword("");
       setUsername("");
