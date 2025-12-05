@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Settings, FolderPlus, Pencil, Trash2 } from "lucide-react";
+import { Settings, FolderPlus, Pencil, Trash2, X, ChevronRight, Loader2, Calendar } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +30,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { format } from "date-fns";
 
 interface CreateHabitDialogProps {
   open: boolean;
@@ -40,13 +54,13 @@ interface CreateHabitDialogProps {
 }
 
 const WEEKDAYS = [
-  { value: 0, label: 'Sunday' },
-  { value: 1, label: 'Monday' },
-  { value: 2, label: 'Tuesday' },
-  { value: 3, label: 'Wednesday' },
-  { value: 4, label: 'Thursday' },
-  { value: 5, label: 'Friday' },
-  { value: 6, label: 'Saturday' },
+  { value: 0, label: 'Sunday', short: 'Sun' },
+  { value: 1, label: 'Monday', short: 'Mon' },
+  { value: 2, label: 'Tuesday', short: 'Tue' },
+  { value: 3, label: 'Wednesday', short: 'Wed' },
+  { value: 4, label: 'Thursday', short: 'Thu' },
+  { value: 5, label: 'Friday', short: 'Fri' },
+  { value: 6, label: 'Saturday', short: 'Sat' },
 ];
 
 export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, editHabit }: CreateHabitDialogProps) => {
@@ -54,7 +68,7 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
   const [categoryId, setCategoryId] = useState("");
   const [frequency, setFrequency] = useState<"daily" | "weekly" | "weekdays">("daily");
   const [weekdays, setWeekdays] = useState<number[]>([1, 2, 3, 4, 5]);
-  const [weeklyDay, setWeeklyDay] = useState<number>(1); // Default to Monday
+  const [weeklyDay, setWeeklyDay] = useState<number>(1);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [categories, setCategories] = useState<any[]>([]);
@@ -68,6 +82,7 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
     id: "",
     name: ""
   });
+  const [activeTab, setActiveTab] = useState("details");
 
   const fetchCategories = async () => {
     if (!userId) return;
@@ -94,12 +109,12 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
       setWeeklyDay(1);
       setStartDate(new Date().toISOString().split('T')[0]);
       setEndDate("");
+      setActiveTab("details");
     } else if (editHabit) {
       setName(editHabit.name || "");
       setCategoryId(editHabit.category_id || "");
       setFrequency(editHabit.frequency || "daily");
       setWeekdays(editHabit.weekdays || [1, 2, 3, 4, 5]);
-      // For weekly habits, use the start date's day of week
       if (editHabit.frequency === 'weekly' && editHabit.start_date) {
         const startDate = new Date(editHabit.start_date);
         setWeeklyDay(startDate.getDay());
@@ -125,7 +140,6 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
 
   const handleFrequencyChange = (value: "daily" | "weekly" | "weekdays") => {
     setFrequency(value);
-    // When switching to weekly, ensure start date is set to calculate the weekly day
     if (value === 'weekly' && startDate) {
       const date = new Date(startDate);
       setWeeklyDay(date.getDay());
@@ -134,7 +148,6 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
 
   const handleStartDateChange = (value: string) => {
     setStartDate(value);
-    // When frequency is weekly, update the weekly day based on the start date
     if (frequency === 'weekly' && value) {
       const date = new Date(value);
       setWeeklyDay(date.getDay());
@@ -265,7 +278,110 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
     return WEEKDAYS.find(d => d.value === day)?.label || 'Monday';
   };
 
-  const CategoryManagerContent = () => (
+  // Mobile Category Manager Sheet
+  const MobileCategoryManager = () => (
+    <Sheet open={showCategoryManager} onOpenChange={setShowCategoryManager}>
+      <SheetContent side="bottom" className="rounded-t-2xl">
+        <SheetHeader className="mb-4">
+          <SheetTitle>Manage Categories</SheetTitle>
+          <SheetDescription>
+            Create, rename, or delete your habit categories
+          </SheetDescription>
+        </SheetHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="new-category">New Category</Label>
+            <div className="flex gap-2">
+              <Input
+                id="new-category"
+                placeholder="e.g., Fitness"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    createCategory();
+                  }
+                }}
+              />
+              <Button 
+                onClick={createCategory} 
+                disabled={loading || !newCategoryName.trim()}
+                size="icon"
+              >
+                <FolderPlus className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-2 max-h-[300px] overflow-y-auto">
+            {categories.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                No categories yet. Create your first one!
+              </p>
+            ) : (
+              categories.map((cat) => (
+                <div
+                  key={cat.id}
+                  className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg"
+                >
+                  {editingId === cat.id ? (
+                    <>
+                      <Input
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        className="flex-1 text-sm"
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            saveEdit(cat.id);
+                          }
+                          if (e.key === 'Escape') {
+                            setEditingId(null);
+                          }
+                        }}
+                      />
+                      <Button
+                        size="sm"
+                        onClick={() => saveEdit(cat.id)}
+                        disabled={loading}
+                      >
+                        Save
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <span className="flex-1 font-medium text-sm">{cat.name}</span>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => startEdit(cat.id, cat.name)}
+                        className="h-8 w-8"
+                      >
+                        <Pencil className="w-3 h-3" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        onClick={() => setDeleteDialog({ open: true, id: cat.id, name: cat.name })}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+
+  // Desktop Category Manager (inline)
+  const DesktopCategoryManager = () => (
     <div className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="new-category">New Category</Label>
@@ -362,145 +478,334 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
     </div>
   );
 
+  // Mobile weekday selector
+  const MobileWeekdaySelector = () => (
+    <div className="space-y-2">
+      <Label>Select Weekdays</Label>
+      <div className="grid grid-cols-3 gap-2">
+        {WEEKDAYS.map((day) => (
+          <Button
+            key={day.value}
+            variant={weekdays.includes(day.value) ? "default" : "outline"}
+            size="sm"
+            className="h-12 flex-col gap-1 text-xs"
+            onClick={() => toggleWeekday(day.value)}
+          >
+            <span className="text-xs">{day.short}</span>
+            {weekdays.includes(day.value) && <Checkbox className="h-3 w-3" checked />}
+          </Button>
+        ))}
+      </div>
+    </div>
+  );
+
+  // Desktop weekday selector
+  const DesktopWeekdaySelector = () => (
+    <div className="space-y-2">
+      <Label>Select Weekdays</Label>
+      <div className="grid grid-cols-2 gap-2">
+        {WEEKDAYS.map((day) => (
+          <div key={day.value} className="flex items-center space-x-2">
+            <Checkbox
+              id={`day-${day.value}`}
+              checked={weekdays.includes(day.value)}
+              onCheckedChange={() => toggleWeekday(day.value)}
+            />
+            <Label
+              htmlFor={`day-${day.value}`}
+              className="text-sm font-normal cursor-pointer flex-1"
+            >
+              {day.label}
+            </Label>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="bg-card max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editHabit ? 'Edit Habit' : 'Create New Habit'}</DialogTitle>
-            <DialogDescription>
-              {editHabit ? 'Update your habit details' : 'Add a new habit to track and build your streak'}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Habit Name</Label>
-              <Input
-                id="name"
-                placeholder="e.g., Morning Workout"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
+        <DialogContent className="bg-card max-w-md sm:max-w-lg lg:max-w-2xl max-h-[90vh] overflow-y-auto p-0">
+          <div className="sticky top-0 bg-card border-b px-6 py-4 flex items-center justify-between">
+            <div>
+              <DialogTitle className="text-lg sm:text-xl">
+                {editHabit ? 'Edit Habit' : 'Create New Habit'}
+              </DialogTitle>
+              <DialogDescription className="text-sm sm:text-base">
+                {editHabit ? 'Update your habit details' : 'Add a new habit to track'}
+              </DialogDescription>
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onOpenChange(false)}
+              className="md:hidden"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="category">Category</Label>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowCategoryManager(!showCategoryManager)}
-                >
-                  <Settings className="w-4 h-4 mr-2" />
-                  Manage
-                </Button>
-              </div>
-              <Select value={categoryId || "none"} onValueChange={handleCategoryChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="p-6">
+            {/* Mobile Tabs */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="md:hidden">
+              <TabsList className="grid grid-cols-3 mb-6">
+                <TabsTrigger value="details" className="text-xs">Details</TabsTrigger>
+                <TabsTrigger value="schedule" className="text-xs">Schedule</TabsTrigger>
+                <TabsTrigger value="category" className="text-xs">Category</TabsTrigger>
+              </TabsList>
 
-            {showCategoryManager && <CategoryManagerContent />}
-
-            <div className="space-y-2">
-              <Label htmlFor="frequency">Frequency</Label>
-              <Select value={frequency} onValueChange={handleFrequencyChange}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="daily">Daily</SelectItem>
-                  <SelectItem value="weekly">Weekly</SelectItem>
-                  <SelectItem value="weekdays">Weekdays Only</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {frequency === 'weekly' && (
-              <div className="space-y-2">
-                <Label>Weekly Day</Label>
-                <div className="p-3 bg-muted/30 rounded-lg">
-                  <p className="text-sm font-medium">
-                    This habit will repeat every <span className="text-primary">{getWeeklyDayLabel(weeklyDay)}</span>
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Based on your start date: {startDate || 'Not set'}
-                  </p>
+              <TabsContent value="details" className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Habit Name</Label>
+                  <Input
+                    id="name"
+                    placeholder="e.g., Morning Workout"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="text-base"
+                  />
                 </div>
-              </div>
-            )}
+              </TabsContent>
 
-            {frequency === 'weekdays' && (
-              <div className="space-y-2">
-                <Label>Select Weekdays</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {WEEKDAYS.map((day) => (
-                    <div key={day.value} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`day-${day.value}`}
-                        checked={weekdays.includes(day.value)}
-                        onCheckedChange={() => toggleWeekday(day.value)}
-                      />
-                      <Label
-                        htmlFor={`day-${day.value}`}
-                        className="text-sm font-normal cursor-pointer"
-                      >
-                        {day.label}
-                      </Label>
+              <TabsContent value="schedule" className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Frequency</Label>
+                  <Select value={frequency} onValueChange={handleFrequencyChange}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="daily">Daily</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="weekdays">Weekdays Only</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {frequency === 'weekly' && (
+                  <div className="space-y-2">
+                    <Label>Weekly Day</Label>
+                    <div className="p-3 bg-muted/30 rounded-lg">
+                      <p className="text-sm font-medium">
+                        Repeats every <span className="text-primary">{getWeeklyDayLabel(weeklyDay)}</span>
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Based on your start date
+                      </p>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
+                  </div>
+                )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="start-date">Start Date</Label>
-                <Input
-                  id="start-date"
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => handleStartDateChange(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="end-date">End Date (Optional)</Label>
-                <Input
-                  id="end-date"
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  min={startDate}
-                />
+                {frequency === 'weekdays' && <MobileWeekdaySelector />}
+
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="start-date">Start Date</Label>
+                    <div className="relative">
+                      <Input
+                        id="start-date"
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => handleStartDateChange(e.target.value)}
+                      />
+                      <Calendar className="absolute right-3 top-3 w-4 h-4 text-muted-foreground" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="end-date">End Date (Optional)</Label>
+                    <div className="relative">
+                      <Input
+                        id="end-date"
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        min={startDate}
+                      />
+                      <Calendar className="absolute right-3 top-3 w-4 h-4 text-muted-foreground" />
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="category" className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="category">Category</Label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowCategoryManager(true)}
+                    >
+                      <Settings className="w-4 h-4 mr-2" />
+                      Manage
+                    </Button>
+                  </div>
+                  <Select value={categoryId || "none"} onValueChange={handleCategoryChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <MobileCategoryManager />
+              </TabsContent>
+            </Tabs>
+
+            {/* Desktop Layout */}
+            <div className="hidden md:block space-y-6">
+              <div className="grid lg:grid-cols-2 gap-6">
+                {/* Left Column */}
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Habit Name</Label>
+                    <Input
+                      id="name"
+                      placeholder="e.g., Morning Workout"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="text-base"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="category">Category</Label>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowCategoryManager(!showCategoryManager)}
+                      >
+                        <Settings className="w-4 h-4 mr-2" />
+                        Manage
+                      </Button>
+                    </div>
+                    <Select value={categoryId || "none"} onValueChange={handleCategoryChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">None</SelectItem>
+                        {categories.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.id}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {showCategoryManager && <DesktopCategoryManager />}
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="frequency">Frequency</Label>
+                    <Select value={frequency} onValueChange={handleFrequencyChange}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="daily">Daily</SelectItem>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                        <SelectItem value="weekdays">Weekdays Only</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {frequency === 'weekly' && (
+                    <div className="space-y-2">
+                      <Label>Weekly Day</Label>
+                      <div className="p-3 bg-muted/30 rounded-lg">
+                        <p className="text-sm font-medium">
+                          This habit will repeat every <span className="text-primary">{getWeeklyDayLabel(weeklyDay)}</span>
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Based on your start date: {startDate || 'Not set'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {frequency === 'weekdays' && <DesktopWeekdaySelector />}
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="start-date">Start Date</Label>
+                      <div className="relative">
+                        <Input
+                          id="start-date"
+                          type="date"
+                          value={startDate}
+                          onChange={(e) => handleStartDateChange(e.target.value)}
+                        />
+                        <Calendar className="absolute right-3 top-3 w-4 h-4 text-muted-foreground" />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="end-date">End Date (Optional)</Label>
+                      <div className="relative">
+                        <Input
+                          id="end-date"
+                          type="date"
+                          value={endDate}
+                          onChange={(e) => setEndDate(e.target.value)}
+                          min={startDate}
+                        />
+                        <Calendar className="absolute right-3 top-3 w-4 h-4 text-muted-foreground" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="flex gap-2 pt-4">
+            {/* Mobile Submit Button */}
+            <div className="md:hidden mt-8">
+              <Button
+                onClick={handleSubmit}
+                disabled={loading || !name.trim()}
+                className="w-full bg-gradient-primary h-12 text-base"
+                size="lg"
+              >
+                {loading ? (
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                ) : null}
+                {editHabit ? "Update Habit" : "Create Habit"}
+              </Button>
+            </div>
+          </div>
+
+          {/* Desktop Submit Button */}
+          <div className="hidden md:block border-t p-6 bg-card/50">
+            <div className="flex gap-2 justify-end">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-                className="flex-1"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleSubmit}
                 disabled={loading || !name.trim()}
-                className="flex-1 bg-gradient-primary"
+                className="bg-gradient-primary"
               >
-                {loading ? (editHabit ? "Updating..." : "Creating...") : (editHabit ? "Update Habit" : "Create Habit")}
+                {loading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : null}
+                {editHabit ? "Update Habit" : "Create Habit"}
               </Button>
             </div>
           </div>
@@ -508,15 +813,15 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
       </Dialog>
 
       <AlertDialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}>
-        <AlertDialogContent>
+        <AlertDialogContent className="w-[calc(100vw-2rem)] sm:max-w-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Category?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-lg sm:text-xl">Delete Category?</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm sm:text-base">
               Are you sure you want to delete "{deleteDialog.name}"? Habits in this category will become uncategorized.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="mt-2 sm:mt-0">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteCategory(deleteDialog.id)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
