@@ -10,33 +10,9 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
-
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-    },
-  },
-
-  build: {
-    chunkSizeWarningLimit: 1200,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          // Split large libraries into separate chunks
-          react: ["react", "react-dom"],
-          ui: [
-            "framer-motion",
-            "lucide-react",
-            "three",
-            "@radix-ui/react-tooltip",
-            "@radix-ui/react-dialog",
-          ],
-          utils: [
-            "lodash",
-            "date-fns",
-          ],
-        },
-      },
     },
   },
 }));
