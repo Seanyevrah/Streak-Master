@@ -38,12 +38,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { format } from "date-fns";
 
 interface CreateHabitDialogProps {
   open: boolean;
@@ -527,26 +521,17 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="bg-card max-w-md sm:max-w-lg lg:max-w-2xl max-h-[90vh] overflow-y-auto p-0">
-          <div className="sticky top-0 bg-card border-b px-6 py-4 flex items-center justify-between">
-            <div>
+          {/* Remove the duplicate header with close button */}
+          <div className="p-6">
+            <DialogHeader className="mb-6">
               <DialogTitle className="text-lg sm:text-xl">
                 {editHabit ? 'Edit Habit' : 'Create New Habit'}
               </DialogTitle>
               <DialogDescription className="text-sm sm:text-base">
                 {editHabit ? 'Update your habit details' : 'Add a new habit to track'}
               </DialogDescription>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onOpenChange(false)}
-              className="md:hidden"
-            >
-              <X className="w-5 h-5" />
-            </Button>
-          </div>
+            </DialogHeader>
 
-          <div className="p-6">
             {/* Mobile Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="md:hidden">
               <TabsList className="grid grid-cols-3 mb-6">
@@ -773,17 +758,27 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
 
             {/* Mobile Submit Button */}
             <div className="md:hidden mt-8">
-              <Button
-                onClick={handleSubmit}
-                disabled={loading || !name.trim()}
-                className="w-full bg-gradient-primary h-12 text-base"
-                size="lg"
-              >
-                {loading ? (
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                ) : null}
-                {editHabit ? "Update Habit" : "Create Habit"}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSubmit}
+                  disabled={loading || !name.trim()}
+                  className="flex-1 bg-gradient-primary h-12 text-base"
+                  size="lg"
+                >
+                  {loading ? (
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  ) : null}
+                  {editHabit ? "Update Habit" : "Create Habit"}
+                </Button>
+              </div>
             </div>
           </div>
 
