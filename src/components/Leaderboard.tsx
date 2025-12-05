@@ -280,11 +280,11 @@ export const Leaderboard = ({ currentUserId, refreshTrigger }: LeaderboardProps)
   // Loading state
   if (loading) {
     return (
-      <Card className="bg-gradient-card border-border shadow-card">
+      <Card className="bg-gradient-card border-border shadow-card h-full">
         <CardHeader>
           <CardTitle>Top Streakers</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="h-[calc(100%-80px)]">
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <Loader2 className="w-8 h-8 mx-auto mb-4 animate-spin text-primary" />
@@ -297,8 +297,8 @@ export const Leaderboard = ({ currentUserId, refreshTrigger }: LeaderboardProps)
   }
 
   return (
-    <Card className="bg-gradient-card border-border shadow-card">
-      <CardHeader className="pb-4">
+    <Card className="bg-gradient-card border-border shadow-card h-full flex flex-col">
+      <CardHeader className="pb-4 flex-shrink-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
             <CardTitle className="text-lg sm:text-xl">Leaderboard</CardTitle>
@@ -336,7 +336,7 @@ export const Leaderboard = ({ currentUserId, refreshTrigger }: LeaderboardProps)
         </div>
       </CardHeader>
       
-      <CardContent>
+      <CardContent className="flex-1 overflow-y-auto px-4 sm:px-6">
         {/* Top 3 Podium - Desktop */}
         <div className="hidden lg:block mb-6">
           <div className="grid grid-cols-3 gap-4">
@@ -368,7 +368,7 @@ export const Leaderboard = ({ currentUserId, refreshTrigger }: LeaderboardProps)
         </div>
         
         {/* Leaderboard List */}
-        <div className="space-y-2 sm:space-y-3 max-h-[400px] overflow-y-auto pr-1 sm:pr-2 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/40">
+        <div className="space-y-2 sm:space-y-3">
           {leaders.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Trophy className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -395,7 +395,11 @@ export const Leaderboard = ({ currentUserId, refreshTrigger }: LeaderboardProps)
         </div>
 
         {/* Current User Stats */}
-        {currentUserData && currentUserRank && <CurrentUserStats />}
+        {currentUserData && currentUserRank && (
+          <div className="mt-4">
+            <CurrentUserStats />
+          </div>
+        )}
         
         {/* Legend */}
         <div className="mt-6 pt-4 border-t">
