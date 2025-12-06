@@ -16,8 +16,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
-  
-  // Get the tab parameter from the URL, default to "signin" if not provided
+
   const defaultTab = searchParams.get("tab") || "signin";
 
   useEffect(() => {
