@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Settings, FolderPlus, Pencil, Trash2, X, ChevronRight, Loader2, Calendar } from "lucide-react";
+import { Settings, FolderPlus, Pencil, Trash2, Loader2, Calendar } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -66,7 +66,8 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [categories, setCategories] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [habitLoading, setHabitLoading] = useState(false);
+  const [categoryLoading, setCategoryLoading] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -161,7 +162,7 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
       return;
     }
 
-    setLoading(true);
+    setHabitLoading(true);
 
     try {
       const habitData = {
@@ -196,14 +197,14 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
     } catch (error: any) {
       toast.error(error.message || `Failed to ${editHabit ? 'update' : 'create'} habit`);
     } finally {
-      setLoading(false);
+      setHabitLoading(false);
     }
   };
 
   const createCategory = async () => {
     if (!userId || !newCategoryName.trim()) return;
 
-    setLoading(true);
+    setCategoryLoading(true);
     try {
       const { error } = await supabase
         .from('categories')
@@ -217,7 +218,7 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
     } catch (error: any) {
       toast.error(error.message || "Failed to create category");
     } finally {
-      setLoading(false);
+      setCategoryLoading(false);
     }
   };
 
@@ -229,7 +230,7 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
   const saveEdit = async (id: string) => {
     if (!editName.trim()) return;
 
-    setLoading(true);
+    setCategoryLoading(true);
     try {
       const { error } = await supabase
         .from('categories')
@@ -244,12 +245,12 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
     } catch (error: any) {
       toast.error(error.message || "Failed to rename category");
     } finally {
-      setLoading(false);
+      setCategoryLoading(false);
     }
   };
 
   const deleteCategory = async (id: string) => {
-    setLoading(true);
+    setCategoryLoading(true);
     try {
       const { error } = await supabase
         .from('categories')
@@ -264,7 +265,7 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
     } catch (error: any) {
       toast.error(error.message || "Failed to delete category");
     } finally {
-      setLoading(false);
+      setCategoryLoading(false);
     }
   };
 
@@ -291,6 +292,7 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
                 placeholder="e.g., Fitness"
                 value={newCategoryName}
                 onChange={(e) => setNewCategoryName(e.target.value)}
+                disabled={categoryLoading}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
@@ -300,10 +302,14 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
               />
               <Button 
                 onClick={createCategory} 
-                disabled={loading || !newCategoryName.trim()}
+                disabled={categoryLoading || !newCategoryName.trim()}
                 size="icon"
               >
-                <FolderPlus className="w-4 h-4" />
+                {categoryLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <FolderPlus className="w-4 h-4" />
+                )}
               </Button>
             </div>
           </div>
@@ -326,6 +332,7 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
                         onChange={(e) => setEditName(e.target.value)}
                         className="flex-1 text-sm"
                         autoFocus
+                        disabled={categoryLoading}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             e.preventDefault();
@@ -339,7 +346,7 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
                       <Button
                         size="sm"
                         onClick={() => saveEdit(cat.id)}
-                        disabled={loading}
+                        disabled={categoryLoading}
                       >
                         Save
                       </Button>
@@ -352,6 +359,7 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
                         variant="ghost"
                         onClick={() => startEdit(cat.id, cat.name)}
                         className="h-8 w-8"
+                        disabled={categoryLoading}
                       >
                         <Pencil className="w-3 h-3" />
                       </Button>
@@ -360,6 +368,7 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
                         variant="ghost"
                         className="h-8 w-8 text-destructive hover:text-destructive"
                         onClick={() => setDeleteDialog({ open: true, id: cat.id, name: cat.name })}
+                        disabled={categoryLoading}
                       >
                         <Trash2 className="w-3 h-3" />
                       </Button>
@@ -385,6 +394,7 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
             placeholder="e.g., Fitness"
             value={newCategoryName}
             onChange={(e) => setNewCategoryName(e.target.value)}
+            disabled={categoryLoading}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault();
@@ -394,9 +404,13 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
           />
           <Button 
             onClick={createCategory} 
-            disabled={loading || !newCategoryName.trim()}
+            disabled={categoryLoading || !newCategoryName.trim()}
           >
-            <FolderPlus className="w-4 h-4 mr-2" />
+            {categoryLoading ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <FolderPlus className="w-4 h-4 mr-2" />
+            )}
             Add
           </Button>
         </div>
@@ -420,6 +434,7 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
                     onChange={(e) => setEditName(e.target.value)}
                     className="flex-1"
                     autoFocus
+                    disabled={categoryLoading}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         e.preventDefault();
@@ -433,7 +448,7 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
                   <Button
                     size="sm"
                     onClick={() => saveEdit(cat.id)}
-                    disabled={loading}
+                    disabled={categoryLoading}
                   >
                     Save
                   </Button>
@@ -441,6 +456,7 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
                     size="sm"
                     variant="ghost"
                     onClick={() => setEditingId(null)}
+                    disabled={categoryLoading}
                   >
                     Cancel
                   </Button>
@@ -452,6 +468,7 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
                     size="icon"
                     variant="ghost"
                     onClick={() => startEdit(cat.id, cat.name)}
+                    disabled={categoryLoading}
                   >
                     <Pencil className="w-4 h-4" />
                   </Button>
@@ -460,6 +477,7 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
                     variant="ghost"
                     className="text-destructive hover:text-destructive"
                     onClick={() => setDeleteDialog({ open: true, id: cat.id, name: cat.name })}
+                    disabled={categoryLoading}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -486,7 +504,11 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
             onClick={() => toggleWeekday(day.value)}
           >
             <span className="text-xs">{day.short}</span>
-            {weekdays.includes(day.value) && <Checkbox className="h-3 w-3" checked />}
+            {weekdays.includes(day.value) && (
+              <div className="h-3 w-3 flex items-center justify-center">
+                <div className="h-2 w-2 bg-background rounded-full" />
+              </div>
+            )}
           </Button>
         ))}
       </div>
@@ -517,11 +539,16 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
     </div>
   );
 
+  // Function to open date picker
+  const openDatePicker = (id: string) => {
+    const input = document.getElementById(id) as HTMLInputElement;
+    input?.showPicker?.();
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="bg-card max-w-md sm:max-w-lg lg:max-w-2xl max-h-[90vh] overflow-y-auto p-0">
-          {/* Remove the duplicate header with close button */}
           <div className="p-6">
             <DialogHeader className="mb-6">
               <DialogTitle className="text-lg sm:text-xl">
@@ -563,7 +590,7 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
                     <SelectContent>
                       <SelectItem value="daily">Daily</SelectItem>
                       <SelectItem value="weekly">Weekly</SelectItem>
-                      <SelectItem value="weekdays">Custom Day</SelectItem>
+                      <SelectItem value="weekdays">Custom Days</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -587,27 +614,43 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
                 <div className="grid grid-cols-1 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="start-date">Start Date</Label>
-                    <div className="relative">
+                    <div className="flex items-center gap-2">
                       <Input
                         id="start-date"
                         type="date"
                         value={startDate}
                         onChange={(e) => handleStartDateChange(e.target.value)}
+                        className="flex-1"
                       />
-                      <Calendar className="absolute right-3 top-3 w-4 h-4 text-muted-foreground" />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => openDatePicker('start-date')}
+                      >
+                        <Calendar className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="end-date">End Date (Optional)</Label>
-                    <div className="relative">
+                    <div className="flex items-center gap-2">
                       <Input
                         id="end-date"
                         type="date"
                         value={endDate}
                         onChange={(e) => setEndDate(e.target.value)}
                         min={startDate}
+                        className="flex-1"
                       />
-                      <Calendar className="absolute right-3 top-3 w-4 h-4 text-muted-foreground" />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => openDatePicker('end-date')}
+                      >
+                        <Calendar className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -672,7 +715,7 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
                         onClick={() => setShowCategoryManager(!showCategoryManager)}
                       >
                         <Settings className="w-4 h-4 mr-2" />
-                        Manage
+                        {showCategoryManager ? "Hide" : "Manage"}
                       </Button>
                     </div>
                     <Select value={categoryId || "none"} onValueChange={handleCategoryChange}>
@@ -704,7 +747,7 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
                       <SelectContent>
                         <SelectItem value="daily">Daily</SelectItem>
                         <SelectItem value="weekly">Weekly</SelectItem>
-                        <SelectItem value="weekdays">Custom Day</SelectItem>
+                        <SelectItem value="weekdays">Custom Days</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -725,30 +768,53 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
 
                   {frequency === 'weekdays' && <DesktopWeekdaySelector />}
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="start-date">Start Date</Label>
-                      <div className="relative">
-                        <Input
-                          id="start-date"
-                          type="date"
-                          value={startDate}
-                          onChange={(e) => handleStartDateChange(e.target.value)}
-                        />
-                        <Calendar className="absolute right-3 top-3 w-4 h-4 text-muted-foreground" />
+                      <Label htmlFor="start-date-desktop">Start Date</Label>
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <Input
+                            id="start-date-desktop"
+                            type="date"
+                            value={startDate}
+                            onChange={(e) => handleStartDateChange(e.target.value)}
+                            className="w-full pr-10"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 hover:bg-transparent"
+                            onClick={() => openDatePicker('start-date-desktop')}
+                          >
+                            <Calendar className="w-4 h-4 text-muted-foreground" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
+                    
                     <div className="space-y-2">
-                      <Label htmlFor="end-date">End Date (Optional)</Label>
-                      <div className="relative">
-                        <Input
-                          id="end-date"
-                          type="date"
-                          value={endDate}
-                          onChange={(e) => setEndDate(e.target.value)}
-                          min={startDate}
-                        />
-                        <Calendar className="absolute right-3 top-3 w-4 h-4 text-muted-foreground" />
+                      <Label htmlFor="end-date-desktop">End Date (Optional)</Label>
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <Input
+                            id="end-date-desktop"
+                            type="date"
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                            min={startDate}
+                            className="w-full pr-10"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 hover:bg-transparent"
+                            onClick={() => openDatePicker('end-date-desktop')}
+                          >
+                            <Calendar className="w-4 h-4 text-muted-foreground" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -769,11 +835,11 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
                 </Button>
                 <Button
                   onClick={handleSubmit}
-                  disabled={loading || !name.trim()}
+                  disabled={habitLoading || !name.trim()}
                   className="flex-1 bg-gradient-primary h-12 text-base"
                   size="lg"
                 >
-                  {loading ? (
+                  {habitLoading ? (
                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                   ) : null}
                   {editHabit ? "Update Habit" : "Create Habit"}
@@ -794,10 +860,10 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
               </Button>
               <Button
                 onClick={handleSubmit}
-                disabled={loading || !name.trim()}
+                disabled={habitLoading || !name.trim()}
                 className="bg-gradient-primary"
               >
-                {loading ? (
+                {habitLoading ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 ) : null}
                 {editHabit ? "Update Habit" : "Create Habit"}
@@ -820,7 +886,9 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
             <AlertDialogAction
               onClick={() => deleteCategory(deleteDialog.id)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={categoryLoading}
             >
+              {categoryLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
