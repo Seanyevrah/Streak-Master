@@ -36,10 +36,11 @@ export const Leaderboard = ({ currentUserId, refreshTrigger }: LeaderboardProps)
     setLoading(true);
     
     try {
-      // Fetch all profiles for ranking
+      // Fetch all profiles with non-zero streaks for ranking
       const { data: allProfiles } = await supabase
         .from('profiles')
         .select('*')
+        .gt('total_streak', 0) // Only include profiles with streak > 0
         .order('total_streak', { ascending: false });
 
       if (allProfiles) {
@@ -47,14 +48,35 @@ export const Leaderboard = ({ currentUserId, refreshTrigger }: LeaderboardProps)
         const top10 = allProfiles.slice(0, 10);
         setLeaders(top10);
         
-        // Find current user's rank and data
+        // Find current user's rank and data (even if streak is 0)
         if (currentUserId) {
-          const userIndex = allProfiles.findIndex(p => p.id === currentUserId);
-          if (userIndex !== -1) {
-            setCurrentUserRank(userIndex + 1);
-            setCurrentUserData(allProfiles[userIndex]);
+          // Fetch current user's data separately to include even if streak is 0
+          const { data: userProfile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', currentUserId)
+            .single();
+          
+          if (userProfile) {
+            setCurrentUserData(userProfile);
+            
+            // Calculate user's rank based on all profiles with streak > 0
+            if (userProfile.total_streak > 0) {
+              const userIndex = allProfiles.findIndex(p => p.id === currentUserId);
+              if (userIndex !== -1) {
+                setCurrentUserRank(userIndex + 1);
+              } else {
+                // User has streak > 0 but not in top list, rank is total count
+                setCurrentUserRank(allProfiles.length + 1);
+              }
+            } else {
+              // User has 0 streak, set rank to null
+              setCurrentUserRank(null);
+            }
           }
         }
+      } else {
+        setLeaders([]);
       }
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
@@ -221,12 +243,12 @@ export const Leaderboard = ({ currentUserId, refreshTrigger }: LeaderboardProps)
     );
   };
 
-  // Current user stats card (moved to bottom of leaderboard)
+  // Current user stats card
   const CurrentUserStats = () => {
-    if (!currentUserData || !currentUserRank) return null;
+    if (!currentUserData) return null;
     
-    const nextRankUser = leaders[currentUserRank] || leaders[0];
-    const pointsToNextRank = nextRankUser ? Math.max(0, nextRankUser.total_streak - currentUserData.total_streak + 1) : 0;
+    // If user has 0 streak, show motivational message
+    const hasStreak = currentUserData.total_streak > 0;
     
     return (
       <Card className="bg-gradient-primary/5 border-primary/20 mt-4">
@@ -234,11 +256,19 @@ export const Leaderboard = ({ currentUserId, refreshTrigger }: LeaderboardProps)
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="font-bold text-lg sm:text-xl">Your Position</h3>
-              <p className="text-sm text-muted-foreground">Global ranking</p>
+              <p className="text-sm text-muted-foreground">
+                {hasStreak ? 'Global ranking' : 'Start building your streak!'}
+              </p>
             </div>
-            <Badge variant="secondary" className="text-lg sm:text-xl px-3 py-1">
-              #{currentUserRank}
-            </Badge>
+            {hasStreak && currentUserRank ? (
+              <Badge variant="secondary" className="text-lg sm:text-xl px-3 py-1">
+                #{currentUserRank}
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="text-lg sm:text-xl px-3 py-1">
+                Not Ranked
+              </Badge>
+            )}
           </div>
           
           <div className="space-y-4">
@@ -246,29 +276,53 @@ export const Leaderboard = ({ currentUserId, refreshTrigger }: LeaderboardProps)
               <div className="bg-card rounded-lg p-3">
                 <p className="text-sm text-muted-foreground mb-1">Total Streak</p>
                 <div className="flex items-center gap-2">
-                  <Flame className="w-5 h-5 text-warning" />
+                  <Flame className={`w-5 h-5 ${hasStreak ? 'text-warning' : 'text-muted-foreground'}`} />
                   <span className="text-2xl font-bold">{currentUserData.total_streak || 0}</span>
                 </div>
               </div>
               
-              <div className="bg-card rounded-lg p-3">
-                <p className="text-sm text-muted-foreground mb-1">Points to Next Rank</p>
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-primary" />
-                  <span className="text-2xl font-bold">{pointsToNextRank}</span>
+              {hasStreak && currentUserRank && leaders.length > 0 ? (
+                <div className="bg-card rounded-lg p-3">
+                  <p className="text-sm text-muted-foreground mb-1">Points to Next Rank</p>
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-primary" />
+                    {currentUserRank > 1 ? (
+                      <span className="text-2xl font-bold">
+                        {Math.max(0, (leaders[currentUserRank - 2]?.total_streak || 0) - currentUserData.total_streak + 1)}
+                      </span>
+                    ) : (
+                      <span className="text-2xl font-bold">0</span>
+                    )}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="bg-card rounded-lg p-3">
+                  <p className="text-sm text-muted-foreground mb-1">Complete 1 Day</p>
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-primary" />
+                    <span className="text-2xl font-bold">1</span>
+                  </div>
+                </div>
+              )}
             </div>
             
-            {pointsToNextRank > 0 && (
+            {hasStreak && currentUserRank && currentUserRank > 1 && leaders.length > 0 && (
               <div>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Need {pointsToNextRank} more days to reach rank #{currentUserRank - 1}
+                  Need {Math.max(0, (leaders[currentUserRank - 2]?.total_streak || 0) - currentUserData.total_streak + 1)} more days to reach rank #{currentUserRank - 1}
                 </p>
                 <Progress 
-                  value={((currentUserData.total_streak || 0) / ((currentUserData.total_streak || 0) + pointsToNextRank)) * 100} 
+                  value={((currentUserData.total_streak || 0) / ((leaders[currentUserRank - 2]?.total_streak || 1))) * 100} 
                   className="h-2"
                 />
+              </div>
+            )}
+            
+            {!hasStreak && (
+              <div className="text-center py-2">
+                <p className="text-sm text-muted-foreground">
+                  Complete habits for 1 day to appear on the leaderboard!
+                </p>
               </div>
             )}
           </div>
@@ -280,8 +334,8 @@ export const Leaderboard = ({ currentUserId, refreshTrigger }: LeaderboardProps)
   // Loading state
   if (loading) {
     return (
-      <Card className="bg-gradient-card border-border shadow-card h-full">
-        <CardContent className="h-[calc(100%-80px)]">
+      <Card className="bg-gradient-card border-border shadow-card">
+        <CardContent>
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <Loader2 className="w-8 h-8 mx-auto mb-4 animate-spin text-primary" />
@@ -294,8 +348,8 @@ export const Leaderboard = ({ currentUserId, refreshTrigger }: LeaderboardProps)
   }
 
   return (
-    <Card className="bg-gradient-card border-border shadow-card h-full flex flex-col">
-      <CardHeader className="pb-4 flex-shrink-0">
+    <Card className="bg-gradient-card border-border shadow-card">
+      <CardHeader className="pb-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
             <CardTitle className="text-lg sm:text-xl">Leaderboard</CardTitle>
@@ -333,44 +387,51 @@ export const Leaderboard = ({ currentUserId, refreshTrigger }: LeaderboardProps)
         </div>
       </CardHeader>
       
-      <CardContent className="flex-1 overflow-y-auto px-4 sm:px-6">
+      <CardContent>
         {/* Top 3 Podium - Desktop */}
         <div className="hidden lg:block mb-6">
-          <div className="grid grid-cols-3 gap-4">
-            {leaders.slice(0, 3).map((leader, index) => (
-              <div 
-                key={leader.id}
-                className={`rounded-xl p-4 shadow-lg ${
-                  index === 0 ? 'bg-gradient-to-b from-yellow-500/20 to-transparent order-2' :
-                  index === 1 ? 'bg-gradient-to-b from-gray-500/20 to-transparent order-1 mt-6' :
-                  'bg-gradient-to-b from-orange-500/20 to-transparent order-3 mt-6'
-                }`}
-              >
-                <div className="flex flex-col items-center text-center">
-                  <div className="mb-3">
-                    {getRankIcon(index + 1)}
+          {leaders.length >= 3 ? (
+            <div className="grid grid-cols-3 gap-4">
+              {leaders.slice(0, 3).map((leader, index) => (
+                <div 
+                  key={leader.id}
+                  className={`rounded-xl p-4 shadow-lg ${
+                    index === 0 ? 'bg-gradient-to-b from-yellow-500/20 to-transparent order-2' :
+                    index === 1 ? 'bg-gradient-to-b from-gray-500/20 to-transparent order-1 mt-6' :
+                    'bg-gradient-to-b from-orange-500/20 to-transparent order-3 mt-6'
+                  }`}
+                >
+                  <div className="flex flex-col items-center text-center">
+                    <div className="mb-3">
+                      {getRankIcon(index + 1)}
+                    </div>
+                    <h3 className="font-bold text-lg mb-1">{leader.username}</h3>
+                    <div className="flex items-center gap-1 mb-2">
+                      <Flame className="w-4 h-4 text-warning" />
+                      <span className="text-2xl font-bold">{leader.total_streak || 0}</span>
+                    </div>
+                    <Badge variant="secondary" className="text-sm">
+                      #{index + 1}
+                    </Badge>
                   </div>
-                  <h3 className="font-bold text-lg mb-1">{leader.username}</h3>
-                  <div className="flex items-center gap-1 mb-2">
-                    <Flame className="w-4 h-4 text-warning" />
-                    <span className="text-2xl font-bold">{leader.total_streak || 0}</span>
-                  </div>
-                  <Badge variant="secondary" className="text-sm">
-                    #{index + 1}
-                  </Badge>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <Trophy className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+              <p className="text-muted-foreground">Be the first to build a streak!</p>
+            </div>
+          )}
         </div>
         
-        {/* Leaderboard List */}
-        <div className="space-y-2 sm:space-y-3">
+        {/* Leaderboard List - Scrollable Container */}
+        <div className="space-y-2 sm:space-y-3 max-h-[300px] overflow-y-auto pr-1 sm:pr-2 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/40 mb-4">
           {leaders.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Trophy className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p>No leaderboard data yet</p>
-              <p className="text-sm mt-1">Complete habits to appear on the leaderboard!</p>
+              <p className="text-sm mt-1">Complete habits for 1 day to appear on the leaderboard!</p>
             </div>
           ) : (
             <>
@@ -391,12 +452,8 @@ export const Leaderboard = ({ currentUserId, refreshTrigger }: LeaderboardProps)
           )}
         </div>
 
-        {/* Current User Stats */}
-        {currentUserData && currentUserRank && (
-          <div className="mt-4">
-            <CurrentUserStats />
-          </div>
-        )}
+        {/* Current User Stats - Always show if user is logged in */}
+        {currentUserData && <CurrentUserStats />}
         
         {/* Legend */}
         <div className="mt-6 pt-4 border-t">
