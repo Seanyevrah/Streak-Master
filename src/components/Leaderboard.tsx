@@ -281,9 +281,6 @@ export const Leaderboard = ({ currentUserId, refreshTrigger }: LeaderboardProps)
   if (loading) {
     return (
       <Card className="bg-gradient-card border-border shadow-card h-full">
-        <CardHeader>
-          <CardTitle>Top Streakers</CardTitle>
-        </CardHeader>
         <CardContent className="h-[calc(100%-80px)]">
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
