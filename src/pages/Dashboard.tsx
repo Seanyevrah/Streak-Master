@@ -213,13 +213,148 @@ const Dashboard = () => {
     setTimeout(() => setEditingHabit(null), 200);
   };
 
+  // Loading Skeletons
+  const LoadingSkeleton = () => (
+    <div className="animate-pulse">
+      {/* Header Loading */}
+      <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-3 sm:py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-muted rounded-md"></div>
+              <div className="hidden sm:block">
+                <div className="h-6 bg-muted rounded w-32 mb-1"></div>
+                <div className="h-3 bg-muted rounded w-24"></div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="h-8 bg-muted rounded w-16"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
+        {/* Quick Actions Header Loading */}
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 sm:mb-8">
+          <div className="space-y-2">
+            <div className="h-8 bg-muted rounded w-40"></div>
+            <div className="h-4 bg-muted rounded w-64"></div>
+          </div>
+          <div className="h-10 bg-muted rounded w-32"></div>
+        </div>
+
+        {/* Tabs Loading */}
+        <div className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-2 p-1 bg-muted/50 rounded-lg mb-6">
+          {[1, 2, 3, 4].map((item) => (
+            <div key={item} className="h-10 bg-muted rounded"></div>
+          ))}
+        </div>
+
+        {/* Mobile Tabs Loading */}
+        <div className="sm:hidden mb-6">
+          <div className="h-12 bg-muted rounded"></div>
+        </div>
+
+        {/* Overview Tab Loading */}
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+          {/* Left Column Loading */}
+          <div className="space-y-4 sm:space-y-6">
+            <div className="bg-card rounded-lg p-4 sm:p-6">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 bg-muted rounded"></div>
+                  <div className="h-5 bg-muted rounded w-32"></div>
+                </div>
+                <div className="h-4 bg-muted rounded w-48"></div>
+                <div className="space-y-4 pt-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    {[1, 2, 3, 4].map((item) => (
+                      <div key={item} className="bg-muted/30 rounded-lg p-4">
+                        <div className="h-3 bg-muted rounded w-16 mb-2"></div>
+                        <div className="h-8 bg-muted rounded w-12"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-card rounded-lg p-4 sm:p-6">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 bg-muted rounded"></div>
+                  <div className="h-5 bg-muted rounded w-40"></div>
+                </div>
+                <div className="h-4 bg-muted rounded w-32"></div>
+                <div className="h-48 bg-muted/30 rounded-lg mt-4"></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column Loading */}
+          <div className="space-y-4 sm:space-y-6">
+            <div className="bg-card rounded-lg p-4 sm:p-6">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 bg-muted rounded"></div>
+                  <div className="h-5 bg-muted rounded w-36"></div>
+                </div>
+                <div className="h-4 bg-muted rounded w-48"></div>
+                <div className="space-y-6 pt-4">
+                  {/* Top 3 Podium Loading */}
+                  <div className="flex items-center justify-center gap-4 py-6">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex flex-col items-center">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-muted mb-3" />
+                        <div className="bg-muted rounded-xl w-24 h-8 sm:w-32 sm:h-10" />
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* User Stats Loading */}
+                  <div className="p-4 bg-muted/30 rounded-lg border-2 border-primary/20">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-muted" />
+                        <div>
+                          <div className="h-3 w-16 bg-muted rounded mb-2" />
+                          <div className="h-6 w-8 bg-muted rounded" />
+                        </div>
+                      </div>
+                      <div>
+                        <div className="h-3 w-20 bg-muted rounded mb-2" />
+                        <div className="h-6 w-10 bg-muted rounded" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-card rounded-lg p-4 sm:p-6">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 bg-muted rounded"></div>
+                  <div className="h-5 bg-muted rounded w-32"></div>
+                </div>
+                <div className="h-4 bg-muted rounded w-48"></div>
+                <div className="text-center py-6 sm:py-8">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-muted rounded-full mx-auto mb-3 sm:mb-4"></div>
+                  <div className="h-4 bg-muted rounded w-48 mx-auto"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <Flame className="w-12 h-12 mx-auto mb-4 text-primary animate-pulse" />
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
+      <div className="min-h-screen bg-background">
+        <LoadingSkeleton />
       </div>
     );
   }
@@ -315,13 +450,15 @@ const Dashboard = () => {
   const TopThreePodium = () => {
     if (leaderboardLoading) {
       return (
-        <div className="flex items-center justify-center gap-4 py-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="flex flex-col items-center">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-muted animate-pulse mb-3" />
-              <div className="bg-muted rounded-xl w-24 h-8 sm:w-32 sm:h-10 animate-pulse" />
-            </div>
-          ))}
+        <div className="animate-pulse">
+          <div className="flex items-center justify-center gap-4 py-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex flex-col items-center">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-muted mb-3" />
+                <div className="bg-muted rounded-xl w-24 h-8 sm:w-32 sm:h-10" />
+              </div>
+            ))}
+          </div>
         </div>
       );
     }

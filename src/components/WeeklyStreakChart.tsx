@@ -127,6 +127,102 @@ export const WeeklyStreakChart = ({ userId, refreshTrigger }: WeeklyStreakChartP
     return null;
   };
 
+  // Loading Skeletons
+  const LoadingSkeleton = () => (
+    <>
+      {/* Header Loading */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 animate-pulse">
+        <div className="space-y-2">
+          <div className="h-6 bg-muted rounded w-40"></div>
+          <div className="h-4 bg-muted rounded w-32"></div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-muted rounded-lg"></div>
+          <div>
+            <div className="h-3 bg-muted rounded w-16 mb-1"></div>
+            <div className="h-5 bg-muted rounded w-12"></div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile View Loading */}
+      <div className="sm:hidden space-y-4 animate-pulse">
+        {/* Today's summary loading */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="p-4 bg-card rounded-lg">
+            <div className="h-3 bg-muted rounded w-12 mb-2"></div>
+            <div className="flex items-baseline gap-2">
+              <div className="h-8 bg-muted rounded w-16"></div>
+              <div className="h-4 bg-muted rounded w-8"></div>
+            </div>
+            <div className="h-3 bg-muted rounded w-24 mt-3"></div>
+          </div>
+          
+          <div className="p-4 bg-card rounded-lg">
+            <div className="h-3 bg-muted rounded w-16 mb-2"></div>
+            <div className="h-8 bg-muted rounded w-12"></div>
+            <div className="flex items-center gap-1 mt-3">
+              <div className="flex-1 h-2 bg-muted rounded-full"></div>
+              <div className="h-3 bg-muted rounded w-8"></div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Mini bar chart loading */}
+        <div className="space-y-2">
+          <div className="h-4 bg-muted rounded w-24"></div>
+          <div className="flex items-end justify-between h-24">
+            {[1, 2, 3, 4, 5, 6, 7].map((item) => (
+              <div key={item} className="flex flex-col items-center w-8">
+                <div className="h-3 bg-muted rounded w-6 mb-1"></div>
+                <div className="relative w-4 flex flex-col justify-end h-20">
+                  <div 
+                    className="w-full rounded-t-md bg-muted"
+                    style={{ height: `${Math.random() * 100}%` }}
+                  />
+                  <div className="absolute -bottom-5 left-1/2 transform -translate-x-1/2">
+                    <div className="h-3 bg-muted rounded w-6"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop/Tablet View Loading */}
+      <div className="hidden sm:block animate-pulse">
+        <div className="h-48 lg:h-56 bg-muted/30 rounded-lg">
+          {/* Chart grid lines */}
+          <div className="h-full flex flex-col justify-between p-4">
+            <div className="h-4 bg-muted/50 rounded w-full"></div>
+            <div className="h-4 bg-muted/50 rounded w-full"></div>
+            <div className="h-4 bg-muted/50 rounded w-full"></div>
+            <div className="h-4 bg-muted/50 rounded w-full"></div>
+          </div>
+          {/* X-axis labels */}
+          <div className="flex justify-between px-4 mt-2">
+            {[1, 2, 3, 4, 5, 6, 7].map((item) => (
+              <div key={item} className="h-3 bg-muted rounded w-8"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+      
+      {/* Legend Loading */}
+      <div className="mt-4 pt-4 border-t animate-pulse">
+        <div className="flex flex-wrap gap-3 sm:gap-4">
+          {[1, 2, 3, 4].map((item) => (
+            <div key={item} className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-muted rounded"></div>
+              <div className="h-3 bg-muted rounded w-12"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+
   // Mobile simplified view
   const MobileSummary = () => {
     const today = chartData[chartData.length - 1];
@@ -135,8 +231,48 @@ export const WeeklyStreakChart = ({ userId, refreshTrigger }: WeeklyStreakChartP
     return (
       <div className="sm:hidden space-y-4">
         {loading ? (
-          <div className="h-32 flex items-center justify-center">
-            <div className="animate-pulse">Loading chart...</div>
+          <div className="animate-pulse">
+            {/* Today's summary loading */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-card rounded-lg">
+                <div className="h-3 bg-muted rounded w-12 mb-2"></div>
+                <div className="flex items-baseline gap-2">
+                  <div className="h-8 bg-muted rounded w-16"></div>
+                  <div className="h-4 bg-muted rounded w-8"></div>
+                </div>
+                <div className="h-3 bg-muted rounded w-24 mt-3"></div>
+              </div>
+              
+              <div className="p-4 bg-card rounded-lg">
+                <div className="h-3 bg-muted rounded w-16 mb-2"></div>
+                <div className="h-8 bg-muted rounded w-12"></div>
+                <div className="flex items-center gap-1 mt-3">
+                  <div className="flex-1 h-2 bg-muted rounded-full"></div>
+                  <div className="h-3 bg-muted rounded w-8"></div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Mini bar chart loading */}
+            <div className="space-y-2">
+              <div className="h-4 bg-muted rounded w-24"></div>
+              <div className="flex items-end justify-between h-24">
+                {[1, 2, 3, 4, 5, 6, 7].map((item) => (
+                  <div key={item} className="flex flex-col items-center w-8">
+                    <div className="h-3 bg-muted rounded w-6 mb-1"></div>
+                    <div className="relative w-4 flex flex-col justify-end h-20">
+                      <div 
+                        className="w-full rounded-t-md bg-muted"
+                        style={{ height: `${Math.random() * 100}%` }}
+                      />
+                      <div className="absolute -bottom-5 left-1/2 transform -translate-x-1/2">
+                        <div className="h-3 bg-muted rounded w-6"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         ) : chartData.length === 0 ? (
           <div className="h-32 flex flex-col items-center justify-center text-muted-foreground">
@@ -240,97 +376,100 @@ export const WeeklyStreakChart = ({ userId, refreshTrigger }: WeeklyStreakChartP
         </div>
       </CardHeader>
       <CardContent>
-        {/* Mobile View */}
-        <MobileSummary />
-        
-        {/* Desktop/Tablet View */}
-        <div className="hidden sm:block">
-          {loading ? (
-            <div className="h-48 flex items-center justify-center">
-              <div className="animate-pulse">Loading chart...</div>
-            </div>
-          ) : chartData.length === 0 ? (
-            <div className="h-48 flex flex-col items-center justify-center text-muted-foreground">
-              <Minus className="w-12 h-12 mb-4 opacity-50" />
-              <p>No habit data available</p>
-              <p className="text-sm mt-1">Create habits to see your progress chart</p>
-            </div>
-          ) : (
-            <div className="h-48 lg:h-56">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart 
-                  data={chartData}
-                  margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
-                >
-                  <CartesianGrid 
-                    strokeDasharray="3 3" 
-                    stroke="hsl(var(--border))" 
-                    vertical={false}
-                  />
-                  <XAxis 
-                    dataKey="day" 
-                    stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis 
-                    stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
-                    axisLine={false}
-                    tickLine={false}
-                    domain={[0, 100]}
-                    tickFormatter={(value) => `${value}%`}
-                  />
-                  <Tooltip 
-                    content={<CustomTooltip />}
-                    cursor={{ fill: 'hsl(var(--muted) / 0.3)' }}
-                  />
-                  <Bar 
-                    dataKey="percentage" 
-                    radius={[6, 6, 0, 0]}
-                    barSize={40}
-                  >
-                    {chartData.map((entry, index) => (
-                      <Cell 
-                        key={`cell-${index}`} 
-                        fill={
-                          entry.percentage === 100 ? 'hsl(var(--success))' : 
-                          entry.percentage >= 75 ? 'hsl(var(--primary))' :
-                          entry.percentage >= 50 ? 'hsl(var(--warning))' : 
-                          'hsl(var(--destructive))'
-                        }
-                        className="transition-all duration-300 hover:opacity-80"
+        {/* Loading State */}
+        {loading ? (
+          <LoadingSkeleton />
+        ) : (
+          <>
+            {/* Mobile View */}
+            <MobileSummary />
+            
+            {/* Desktop/Tablet View */}
+            <div className="hidden sm:block">
+              {chartData.length === 0 ? (
+                <div className="h-48 flex flex-col items-center justify-center text-muted-foreground">
+                  <Minus className="w-12 h-12 mb-4 opacity-50" />
+                  <p>No habit data available</p>
+                  <p className="text-sm mt-1">Create habits to see your progress chart</p>
+                </div>
+              ) : (
+                <div className="h-48 lg:h-56">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart 
+                      data={chartData}
+                      margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
+                    >
+                      <CartesianGrid 
+                        strokeDasharray="3 3" 
+                        stroke="hsl(var(--border))" 
+                        vertical={false}
                       />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+                      <XAxis 
+                        dataKey="day" 
+                        stroke="hsl(var(--muted-foreground))"
+                        fontSize={12}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <YAxis 
+                        stroke="hsl(var(--muted-foreground))"
+                        fontSize={12}
+                        axisLine={false}
+                        tickLine={false}
+                        domain={[0, 100]}
+                        tickFormatter={(value) => `${value}%`}
+                      />
+                      <Tooltip 
+                        content={<CustomTooltip />}
+                        cursor={{ fill: 'hsl(var(--muted) / 0.3)' }}
+                      />
+                      <Bar 
+                        dataKey="percentage" 
+                        radius={[6, 6, 0, 0]}
+                        barSize={40}
+                      >
+                        {chartData.map((entry, index) => (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={
+                              entry.percentage === 100 ? 'hsl(var(--success))' : 
+                              entry.percentage >= 75 ? 'hsl(var(--primary))' :
+                              entry.percentage >= 50 ? 'hsl(var(--warning))' : 
+                              'hsl(var(--destructive))'
+                            }
+                            className="transition-all duration-300 hover:opacity-80"
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        
-        {/* Legend */}
-        <div className="mt-4 pt-4 border-t">
-          <div className="flex flex-wrap gap-3 sm:gap-4 text-xs sm:text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded bg-success"></div>
-              <span>100%</span>
+            
+            {/* Legend */}
+            <div className="mt-4 pt-4 border-t">
+              <div className="flex flex-wrap gap-3 sm:gap-4 text-xs sm:text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded bg-success"></div>
+                  <span>100%</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded bg-primary"></div>
+                  <span>75-99%</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded bg-warning"></div>
+                  <span>50-74%</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded bg-destructive"></div>
+                  <span>Below 50%</span>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded bg-primary"></div>
-              <span>75-99%</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded bg-warning"></div>
-              <span>50-74%</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded bg-destructive"></div>
-              <span>Below 50%</span>
-            </div>
-          </div>
-        </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );

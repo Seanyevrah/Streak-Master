@@ -406,6 +406,62 @@ export const HabitList = ({ userId, onUpdate, refreshTrigger, onEditHabit }: Hab
     return content[type];
   };
 
+  // Loading Skeletons
+  const LoadingSkeleton = () => (
+    <div className="space-y-3 sm:space-y-4">
+      {[1, 2, 3].map((i) => (
+        <Card key={i} className="bg-gradient-card border-border shadow-card animate-pulse">
+          <CardContent className="p-4 sm:p-6">
+            {/* Header Skeleton */}
+            <div className="flex justify-between items-start mb-3 sm:mb-4">
+              <div className="flex-1">
+                <div className="h-6 bg-muted rounded w-3/4 mb-2"></div>
+                <div className="h-4 bg-muted rounded w-1/4"></div>
+              </div>
+              <div className="flex gap-1">
+                <div className="h-8 w-8 bg-muted rounded"></div>
+                <div className="h-8 w-8 bg-muted rounded"></div>
+              </div>
+            </div>
+
+            {/* Stats Skeleton */}
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 bg-muted rounded"></div>
+                <div className="h-4 bg-muted rounded w-12"></div>
+              </div>
+              <div className="h-4 bg-muted rounded w-16"></div>
+              <div className="h-6 bg-muted rounded w-20"></div>
+            </div>
+
+            {/* Progress Bar Skeleton */}
+            <div className="h-2 bg-muted rounded-full mb-3 sm:mb-4"></div>
+
+            {/* Action Buttons Skeleton */}
+            <div className="grid grid-cols-3 gap-2 mb-3 sm:mb-4">
+              <div className="h-10 bg-muted rounded"></div>
+              <div className="h-10 bg-muted rounded"></div>
+              <div className="h-10 bg-muted rounded"></div>
+            </div>
+
+            {/* 7-Day History Skeleton */}
+            <div className="bg-muted/30 rounded-lg p-3">
+              <div className="grid grid-cols-7 gap-1 mb-2">
+                {[1, 2, 3, 4, 5, 6, 7].map((day) => (
+                  <div key={day} className="flex flex-col items-center">
+                    <div className="h-3 bg-muted rounded w-6 mb-1"></div>
+                    <div className="h-3 bg-muted rounded w-4 mb-1"></div>
+                    <div className="h-6 w-6 bg-muted rounded"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+
   // Mobile Actions Sheet
   const MobileActionsSheet = ({ habit }: { habit: any }) => (
     <Sheet open={isMobileActionsOpen} onOpenChange={setIsMobileActionsOpen}>
@@ -817,11 +873,27 @@ export const HabitList = ({ userId, onUpdate, refreshTrigger, onEditHabit }: Hab
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 mx-auto mb-4 animate-spin text-primary" />
-          <p className="text-muted-foreground">Loading habits...</p>
+      <div className="space-y-6">
+        {/* Sort Controls Loading */}
+        <div className="flex justify-between items-center mb-4 animate-pulse">
+          <div className="flex items-center gap-2">
+            <div className="hidden sm:block">
+              <div className="w-4 h-4 bg-muted rounded"></div>
+            </div>
+            <div className="w-[140px] sm:w-[180px] h-10 bg-muted rounded"></div>
+          </div>
+          <div className="hidden sm:block">
+            <div className="w-24 h-6 bg-muted rounded"></div>
+          </div>
         </div>
+
+        {/* Mobile Counter Loading */}
+        <div className="sm:hidden mb-4 animate-pulse">
+          <div className="w-20 h-6 bg-muted rounded"></div>
+        </div>
+
+        {/* Loading Skeletons */}
+        <LoadingSkeleton />
       </div>
     );
   }

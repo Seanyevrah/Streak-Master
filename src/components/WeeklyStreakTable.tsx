@@ -153,10 +153,140 @@ export const WeeklyStreakTable = ({ userId, refreshTrigger }: WeeklyStreakTableP
     );
   };
 
+  // Loading Skeletons
+  const LoadingSkeleton = () => (
+    <>
+      {/* Mobile View Loading */}
+      <div className="space-y-4 sm:hidden animate-pulse">
+        {[1, 2, 3].map((item) => (
+          <div key={item} className="p-4 bg-card rounded-lg">
+            <div className="flex justify-between items-start mb-3">
+              <div className="space-y-2">
+                <div className="h-4 bg-muted rounded w-32"></div>
+                <div className="h-5 bg-muted rounded w-16"></div>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-4 h-4 bg-muted rounded"></div>
+                <div className="h-4 bg-muted rounded w-4"></div>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-7 gap-1">
+              {[1, 2, 3, 4, 5, 6, 7].map((day) => (
+                <div key={day} className="flex flex-col items-center">
+                  <div className="h-3 bg-muted rounded w-4 mb-1"></div>
+                  <div className="w-6 h-6 bg-muted rounded-full"></div>
+                  <div className="h-3 bg-muted rounded w-4 mt-1"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop/Tablet View Loading */}
+      <div className="hidden sm:block animate-pulse">
+        <div className="overflow-x-auto -mx-2 px-2">
+          <div className="min-w-full">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[120px] sm:min-w-[150px] lg:min-w-[180px]">
+                    <div className="h-4 bg-muted rounded w-24"></div>
+                  </TableHead>
+                  <TableHead className="min-w-[80px] sm:min-w-[100px]">
+                    <div className="h-4 bg-muted rounded w-20"></div>
+                  </TableHead>
+                  <TableHead className="text-center min-w-[60px]">
+                    <div className="h-4 bg-muted rounded w-16 mx-auto"></div>
+                  </TableHead>
+                  {[1, 2, 3, 4, 5, 6, 7].map((day) => (
+                    <TableHead key={day} className="text-center min-w-[50px] sm:min-w-[60px]">
+                      <div className="flex flex-col items-center">
+                        <div className="h-3 bg-muted rounded w-8 mb-1"></div>
+                        <div className="h-3 bg-muted rounded w-4"></div>
+                      </div>
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[1, 2, 3].map((row) => (
+                  <TableRow key={row}>
+                    <TableCell>
+                      <div className="space-y-2">
+                        <div className="h-4 bg-muted rounded w-32"></div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="h-6 bg-muted rounded w-16"></div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <div className="w-4 h-4 bg-muted rounded"></div>
+                        <div className="h-4 bg-muted rounded w-4"></div>
+                      </div>
+                    </TableCell>
+                    {[1, 2, 3, 4, 5, 6, 7].map((day) => (
+                      <TableCell key={day} className="text-center">
+                        <div className="flex justify-center">
+                          <div className="w-8 h-8 bg-muted rounded-full"></div>
+                        </div>
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      </div>
+
+      {/* Legend Loading */}
+      <div className="mt-6 border-t pt-4 animate-pulse">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          {[1, 2, 3, 4, 5].map((item) => (
+            <div key={item} className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-muted rounded-full"></div>
+              <div className="h-3 bg-muted rounded w-16"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+
   // Mobile condensed view
   const MobileView = () => (
     <div className="space-y-4 sm:hidden">
-      {tableData.length === 0 ? (
+      {loading ? (
+        <div className="animate-pulse">
+          {[1, 2, 3].map((item) => (
+            <div key={item} className="p-4 bg-card rounded-lg">
+              <div className="flex justify-between items-start mb-3">
+                <div className="space-y-2">
+                  <div className="h-4 bg-muted rounded w-32"></div>
+                  <div className="h-5 bg-muted rounded w-16"></div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-4 h-4 bg-muted rounded"></div>
+                  <div className="h-4 bg-muted rounded w-4"></div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-7 gap-1">
+                {[1, 2, 3, 4, 5, 6, 7].map((day) => (
+                  <div key={day} className="flex flex-col items-center">
+                    <div className="h-3 bg-muted rounded w-4 mb-1"></div>
+                    <div className="w-6 h-6 bg-muted rounded-full"></div>
+                    <div className="h-3 bg-muted rounded w-4 mt-1"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : tableData.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
           No habits to display
         </div>
@@ -201,7 +331,7 @@ export const WeeklyStreakTable = ({ userId, refreshTrigger }: WeeklyStreakTableP
           </Card>
         ))
       )}
-      {tableData.length > 3 && (
+      {!loading && tableData.length > 3 && (
         <p className="text-center text-sm text-muted-foreground">
           +{tableData.length - 3} more habits
         </p>
@@ -218,126 +348,125 @@ export const WeeklyStreakTable = ({ userId, refreshTrigger }: WeeklyStreakTableP
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {/* Mobile View */}
-        <MobileView />
-        
-        {/* Desktop/Tablet View */}
-        <div className="hidden sm:block">
-          <div className="overflow-x-auto -mx-2 px-2">
-            <div className="min-w-full">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="min-w-[120px] sm:min-w-[150px] lg:min-w-[180px]">
-                      <span className="text-sm sm:text-base">Habit</span>
-                    </TableHead>
-                    <TableHead className="min-w-[80px] sm:min-w-[100px]">
-                      <span className="text-sm sm:text-base">Category</span>
-                    </TableHead>
-                    <TableHead className="text-center min-w-[60px]">
-                      <span className="text-sm sm:text-base">Streak</span>
-                    </TableHead>
-                    {dates.map((d, idx) => (
-                      <TableHead key={idx} className="text-center min-w-[50px] sm:min-w-[60px]">
-                        <div className="flex flex-col items-center">
-                          <div className="text-xs font-medium">{d.day}</div>
-                          <div className="text-xs text-muted-foreground mt-0.5">
-                            {d.dayNum}
-                          </div>
-                        </div>
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {loading ? (
-                    <TableRow>
-                      <TableCell colSpan={dates.length + 3} className="text-center py-8">
-                        <div className="flex items-center justify-center">
-                          <div className="animate-pulse">Loading...</div>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ) : tableData.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={dates.length + 3} className="text-center py-8 text-muted-foreground">
-                        <div className="flex flex-col items-center gap-2">
-                          <Minus className="w-8 h-8 opacity-50" />
-                          <p>No habits to display</p>
-                          <p className="text-sm">Create your first habit to see progress</p>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    tableData.map((row) => (
-                      <TableRow key={row.id} className="hover:bg-muted/50 transition-colors">
-                        <TableCell className="font-medium">
-                          <div className="truncate max-w-[150px] lg:max-w-[200px] text-sm sm:text-base">
-                            {row.name}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-xs">
-                            {row.category}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <div className="flex items-center justify-center gap-1">
-                            <Flame className="w-4 h-4 text-warning" />
-                            <span className="font-bold text-sm sm:text-base">{row.streak}</span>
-                          </div>
-                        </TableCell>
-                        {row.days.map((day: any, idx: number) => (
-                          <TableCell key={idx} className="text-center">
-                            <div className="flex justify-center">
-                              {getStatusIcon(day.status)}
+        {/* Loading State */}
+        {loading ? (
+          <LoadingSkeleton />
+        ) : (
+          <>
+            {/* Mobile View */}
+            <MobileView />
+            
+            {/* Desktop/Tablet View */}
+            <div className="hidden sm:block">
+              <div className="overflow-x-auto -mx-2 px-2">
+                <div className="min-w-full">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="min-w-[120px] sm:min-w-[150px] lg:min-w-[180px]">
+                          <span className="text-sm sm:text-base">Habit</span>
+                        </TableHead>
+                        <TableHead className="min-w-[80px] sm:min-w-[100px]">
+                          <span className="text-sm sm:text-base">Category</span>
+                        </TableHead>
+                        <TableHead className="text-center min-w-[60px]">
+                          <span className="text-sm sm:text-base">Streak</span>
+                        </TableHead>
+                        {dates.map((d, idx) => (
+                          <TableHead key={idx} className="text-center min-w-[50px] sm:min-w-[60px]">
+                            <div className="flex flex-col items-center">
+                              <div className="text-xs font-medium">{d.day}</div>
+                              <div className="text-xs text-muted-foreground mt-0.5">
+                                {d.dayNum}
+                              </div>
                             </div>
-                          </TableCell>
+                          </TableHead>
                         ))}
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-        </div>
-        
-        {/* Legend for mobile */}
-        <div className="mt-6 border-t pt-4">
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs sm:text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded-full bg-green-500/20 flex items-center justify-center">
-                <span className="text-green-700 dark:text-green-400 text-xs">✓</span>
+                    </TableHeader>
+                    <TableBody>
+                      {tableData.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={dates.length + 3} className="text-center py-8 text-muted-foreground">
+                            <div className="flex flex-col items-center gap-2">
+                              <Minus className="w-8 h-8 opacity-50" />
+                              <p>No habits to display</p>
+                              <p className="text-sm">Create your first habit to see progress</p>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        tableData.map((row) => (
+                          <TableRow key={row.id} className="hover:bg-muted/50 transition-colors">
+                            <TableCell className="font-medium">
+                              <div className="truncate max-w-[150px] lg:max-w-[200px] text-sm sm:text-base">
+                                {row.name}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="text-xs">
+                                {row.category}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <div className="flex items-center justify-center gap-1">
+                                <Flame className="w-4 h-4 text-warning" />
+                                <span className="font-bold text-sm sm:text-base">{row.streak}</span>
+                              </div>
+                            </TableCell>
+                            {row.days.map((day: any, idx: number) => (
+                              <TableCell key={idx} className="text-center">
+                                <div className="flex justify-center">
+                                  {getStatusIcon(day.status)}
+                                </div>
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
-              <span>Done</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded-full bg-red-500/20 flex items-center justify-center">
-                <span className="text-red-700 dark:text-red-400 text-xs">✗</span>
+            
+            {/* Legend for mobile */}
+            <div className="mt-6 border-t pt-4">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs sm:text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <span className="text-green-700 dark:text-green-400 text-xs">✓</span>
+                  </div>
+                  <span>Done</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-red-500/20 flex items-center justify-center">
+                    <span className="text-red-700 dark:text-red-400 text-xs">✗</span>
+                  </div>
+                  <span>Missed</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                    <span className="text-yellow-700 dark:text-yellow-400 text-xs">○</span>
+                  </div>
+                  <span>Skipped</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-muted flex items-center justify-center">
+                    <span className="text-muted-foreground text-xs">-</span>
+                  </div>
+                  <span>Pending</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-muted/30 flex items-center justify-center">
+                    <span className="text-muted-foreground/50 text-xs">-</span>
+                  </div>
+                  <span>Not Scheduled</span>
+                </div>
               </div>
-              <span>Missed</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded-full bg-yellow-500/20 flex items-center justify-center">
-                <span className="text-yellow-700 dark:text-yellow-400 text-xs">○</span>
-              </div>
-              <span>Skipped</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded-full bg-muted flex items-center justify-center">
-                <span className="text-muted-foreground text-xs">-</span>
-              </div>
-              <span>Pending</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded-full bg-muted/30 flex items-center justify-center">
-                <span className="text-muted-foreground/50 text-xs">-</span>
-              </div>
-              <span>Not Scheduled</span>
-            </div>
-          </div>
-        </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );

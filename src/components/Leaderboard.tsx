@@ -138,6 +138,155 @@ export const Leaderboard = ({ currentUserId, refreshTrigger }: LeaderboardProps)
     }
   };
 
+  // Loading Skeletons
+  const LoadingSkeleton = () => (
+    <>
+      {/* Header Loading */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 animate-pulse">
+        <div className="space-y-2">
+          <div className="h-6 bg-muted rounded w-32"></div>
+          <div className="h-4 bg-muted rounded w-48"></div>
+        </div>
+        <div className="hidden sm:block">
+          <div className="w-[140px] h-10 bg-muted rounded"></div>
+        </div>
+      </div>
+
+      {/* Mobile Tabs Loading */}
+      <div className="sm:hidden mb-4 animate-pulse">
+        <div className="grid grid-cols-3 gap-1 w-full">
+          <div className="h-10 bg-muted rounded"></div>
+          <div className="h-10 bg-muted rounded"></div>
+          <div className="h-10 bg-muted rounded"></div>
+        </div>
+      </div>
+
+      {/* Top 3 Podium Loading - Desktop */}
+      <div className="hidden lg:block mb-6 animate-pulse">
+        <div className="grid grid-cols-3 gap-4">
+          {[1, 2, 3].map((item) => (
+            <div 
+              key={item}
+              className={`rounded-xl p-4 shadow-lg bg-muted/50 ${
+                item === 1 ? 'order-2' : 'mt-6'
+              }`}
+            >
+              <div className="flex flex-col items-center text-center">
+                <div className="w-10 h-10 bg-muted rounded-full mb-3"></div>
+                <div className="h-5 bg-muted rounded w-24 mb-2"></div>
+                <div className="flex items-center gap-1 mb-2">
+                  <div className="w-4 h-4 bg-muted rounded"></div>
+                  <div className="h-8 bg-muted rounded w-8"></div>
+                </div>
+                <div className="h-6 bg-muted rounded w-12"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Leaderboard List Loading */}
+      <div className="space-y-2 sm:space-y-3 max-h-[300px] overflow-y-auto pr-1 sm:pr-2 mb-4">
+        {[1, 2, 3, 4, 5].map((item) => (
+          <div key={item} className="animate-pulse">
+            {/* Mobile Item Loading */}
+            <div className="lg:hidden">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-card shadow-sm">
+                <div className="w-8 h-8 bg-muted rounded-full flex-shrink-0"></div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="h-4 bg-muted rounded w-20"></div>
+                    <div className="h-5 bg-muted rounded w-8"></div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <div className="w-3 h-3 bg-muted rounded"></div>
+                      <div className="h-4 bg-muted rounded w-6"></div>
+                      <div className="h-3 bg-muted rounded w-12"></div>
+                    </div>
+                    <div className="h-6 bg-muted rounded w-8"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Desktop Item Loading */}
+            <div className="hidden lg:block">
+              <div className="flex items-center gap-4 p-4 rounded-xl bg-card hover:bg-muted/50">
+                <div className="w-10 h-10 bg-muted rounded-full flex-shrink-0"></div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="h-5 bg-muted rounded w-24"></div>
+                    <div className="h-6 bg-muted rounded w-12"></div>
+                    <div className="ml-auto h-6 bg-muted rounded w-16"></div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="h-2 bg-muted rounded flex-1"></div>
+                    <div className="flex items-center gap-1 min-w-[80px]">
+                      <div className="w-4 h-4 bg-muted rounded"></div>
+                      <div className="h-5 bg-muted rounded w-6"></div>
+                      <div className="h-4 bg-muted rounded w-12"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Current User Stats Loading */}
+      <div className="animate-pulse">
+        <div className="bg-gradient-primary/5 border-primary/20 rounded-xl p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="space-y-2">
+              <div className="h-6 bg-muted rounded w-32"></div>
+              <div className="h-4 bg-muted rounded w-24"></div>
+            </div>
+            <div className="h-8 bg-muted rounded w-16"></div>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-card rounded-lg p-3">
+                <div className="h-4 bg-muted rounded w-16 mb-2"></div>
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 bg-muted rounded"></div>
+                  <div className="h-8 bg-muted rounded w-12"></div>
+                </div>
+              </div>
+              
+              <div className="bg-card rounded-lg p-3">
+                <div className="h-4 bg-muted rounded w-20 mb-2"></div>
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 bg-muted rounded"></div>
+                  <div className="h-8 bg-muted rounded w-8"></div>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <div className="h-3 bg-muted rounded w-full mb-2"></div>
+              <div className="h-2 bg-muted rounded-full"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Legend Loading */}
+      <div className="mt-6 pt-4 border-t animate-pulse">
+        <div className="flex flex-wrap gap-4">
+          {[1, 2, 3, 4].map((item) => (
+            <div key={item} className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-muted rounded-full"></div>
+              <div className="h-3 bg-muted rounded w-16"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+
   // Mobile leaderboard item
   const MobileLeaderItem = ({ leader, rank }: { leader: any, rank: number }) => {
     const isCurrentUser = leader.id === currentUserId;
@@ -334,15 +483,10 @@ export const Leaderboard = ({ currentUserId, refreshTrigger }: LeaderboardProps)
   // Loading state
   if (loading) {
     return (
-      <Card className="bg-gradient-card border-border shadow-card">
-        <CardContent>
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <Loader2 className="w-8 h-8 mx-auto mb-4 animate-spin text-primary" />
-              <p className="text-muted-foreground">Loading leaderboard...</p>
-            </div>
-          </div>
-        </CardContent>
+      <Card className="bg-gradient-card border-border shadow-card animate-pulse">
+        <CardHeader className="pb-4">
+          <LoadingSkeleton />
+        </CardHeader>
       </Card>
     );
   }
