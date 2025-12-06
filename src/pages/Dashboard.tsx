@@ -311,7 +311,7 @@ const Dashboard = () => {
     </Sheet>
   );
 
-  // Top 3 Podium Component - Updated to match Leaderboard.tsx
+  // Top 3 Podium Component
   const TopThreePodium = () => {
     if (leaderboardLoading) {
       return (
