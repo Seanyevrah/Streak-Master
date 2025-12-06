@@ -355,23 +355,6 @@ const Dashboard = () => {
                     <WeeklyStreakChart userId={user?.id} refreshTrigger={refreshTrigger} />
                   </CardContent>
                 </Card>
-              </div>
-
-              <div className="space-y-4 sm:space-y-6">
-                <Card>
-                  <CardHeader className="pb-3 sm:pb-4">
-                    <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                      <Trophy className="w-4 h-4 sm:w-5 sm:h-5" />
-                      Leaderboard
-                    </CardTitle>
-                    <CardDescription className="text-sm sm:text-base">
-                      See how you rank among others
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Leaderboard currentUserId={user?.id} refreshTrigger={refreshTrigger} />
-                  </CardContent>
-                </Card>
 
                 <Card>
                   <CardHeader className="pb-3 sm:pb-4">
@@ -390,6 +373,23 @@ const Dashboard = () => {
                         Recent activity will appear here
                       </p>
                     </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-4 sm:space-y-6">
+                <Card>
+                  <CardHeader className="pb-3 sm:pb-4">
+                    <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                      <Trophy className="w-4 h-4 sm:w-5 sm:h-5" />
+                      Leaderboard
+                    </CardTitle>
+                    <CardDescription className="text-sm sm:text-base">
+                      See how you rank among others
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Leaderboard currentUserId={user?.id} refreshTrigger={refreshTrigger} />
                   </CardContent>
                 </Card>
               </div>
