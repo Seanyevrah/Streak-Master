@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
-import { Flame, LogOut, Plus, Trophy, BarChart3, Calendar, List, Target, Menu, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Flame, LogOut, Plus, Trophy, BarChart3, Calendar, List, Target, Menu, Medal, Crown, Award } from "lucide-react";
 import { toast } from "sonner";
 import { HabitList } from "@/components/HabitList";
 import { StatsOverview } from "@/components/StatsOverview";
@@ -41,6 +42,10 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [leaderboardData, setLeaderboardData] = useState<any[]>([]);
+  const [userRank, setUserRank] = useState<number | null>(null);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+  const [leaderboardError, setLeaderboardError] = useState<string | null>(null);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -67,6 +72,126 @@ const Dashboard = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    let mounted = true;
+    let pollInterval: NodeJS.Timeout;
+
+    const fetchLeaderboard = async () => {
+      if (!mounted) return;
+
+      setLeaderboardLoading(true);
+      setLeaderboardError(null);
+
+      try {
+        // Fetch from profiles table like in Leaderboard.tsx
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .gt('total_streak', 0) // Only include profiles with streak > 0
+          .order('total_streak', { ascending: false })
+          .limit(10);
+
+        if (error) {
+          console.error("Leaderboard fetch error:", error);
+          setLeaderboardError("Failed to load leaderboard");
+          toast.error("Could not load leaderboard data");
+          return;
+        }
+
+        if (mounted) {
+          setLeaderboardData(data || []);
+          
+          // Find current user's rank
+          if (data) {
+            // First check if user has any streaks
+            const { data: userProfile } = await supabase
+              .from('profiles')
+              .select('total_streak')
+              .eq('id', user.id)
+              .single();
+
+            if (userProfile && userProfile.total_streak > 0) {
+              // Find user's rank in the sorted data
+              const userIndex = data.findIndex(p => p.id === user.id);
+              if (userIndex !== -1) {
+                setUserRank(userIndex + 1);
+              } else {
+                // User has streak > 0 but not in top 10, calculate their actual rank
+                const { data: allProfiles } = await supabase
+                  .from('profiles')
+                  .select('id, total_streak')
+                  .gt('total_streak', 0)
+                  .order('total_streak', { ascending: false });
+
+                if (allProfiles) {
+                  const actualIndex = allProfiles.findIndex(p => p.id === user.id);
+                  setUserRank(actualIndex >= 0 ? actualIndex + 1 : null);
+                }
+              }
+            } else {
+              setUserRank(null);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching leaderboard:", error);
+        setLeaderboardError("An unexpected error occurred");
+      } finally {
+        if (mounted) {
+          setLeaderboardLoading(false);
+        }
+      }
+    };
+
+    fetchLeaderboard();
+
+    // Set up polling every 30 seconds as fallback
+    pollInterval = setInterval(fetchLeaderboard, 30000);
+
+    // Set up real-time subscription for profiles table
+    const channel = supabase
+      .channel('public:profiles')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles'
+        },
+        (payload) => {
+          if (mounted) {
+            // Check if this update affects the current user
+            if (payload.new.id === user.id) {
+              // Refresh leaderboard if user's streak changed
+              fetchLeaderboard();
+            } else {
+              // Optimistically update the leaderboard for other users
+              setLeaderboardData(prev => {
+                const updatedData = [...prev];
+                const index = updatedData.findIndex(u => u.id === payload.new.id);
+                
+                if (index !== -1) {
+                  updatedData[index] = { ...updatedData[index], ...payload.new };
+                }
+                
+                // Re-sort the array
+                return updatedData.sort((a, b) => b.total_streak - a.total_streak);
+              });
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      mounted = false;
+      clearInterval(pollInterval);
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, refreshTrigger]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -185,6 +310,425 @@ const Dashboard = () => {
       </SheetContent>
     </Sheet>
   );
+
+  // Top 3 Podium Component - Updated to match Leaderboard.tsx
+  const TopThreePodium = () => {
+    if (leaderboardLoading) {
+      return (
+        <div className="flex items-center justify-center gap-4 py-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex flex-col items-center">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-muted animate-pulse mb-3" />
+              <div className="bg-muted rounded-xl w-24 h-8 sm:w-32 sm:h-10 animate-pulse" />
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (leaderboardError) {
+      return (
+        <div className="py-6 text-center">
+          <p className="text-destructive mb-2">{leaderboardError}</p>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setRefreshTrigger(prev => prev + 1)}
+            className="mt-2"
+          >
+            Retry
+          </Button>
+        </div>
+      );
+    }
+
+    const top3 = leaderboardData.slice(0, 3);
+    
+    if (top3.length === 0) {
+      return (
+        <div className="py-6 text-center">
+          <Trophy className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+          <p className="text-muted-foreground">No leaderboard data available</p>
+        </div>
+      );
+    }
+    
+    const getRankIcon = (rank: number) => {
+      const baseClass = "flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full";
+      
+      switch (rank) {
+        case 1:
+          return (
+            <div className={`${baseClass} bg-gradient-to-br from-yellow-300 to-yellow-500 shadow-lg`}>
+              <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            </div>
+          );
+        case 2:
+          return (
+            <div className={`${baseClass} bg-gradient-to-br from-gray-300 to-gray-400`}>
+              <Medal className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            </div>
+          );
+        case 3:
+          return (
+            <div className={`${baseClass} bg-gradient-to-br from-orange-300 to-orange-500`}>
+              <Award className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            </div>
+          );
+        default:
+          return null;
+      }
+    };
+
+    // For responsive layout - desktop shows side-by-side, mobile shows stacked
+    return (
+      <div className="space-y-4 sm:space-y-6">
+        {/* Desktop Podium - Grid Layout */}
+        <div className="hidden lg:grid grid-cols-3 gap-4 py-4">
+          {top3.length >= 3 ? (
+            // Full podium with 3 positions
+            <>
+              {/* Second Place */}
+              <div 
+                className={`rounded-xl p-4 shadow-lg border ${
+                  top3[1] ? 'bg-gradient-to-b from-gray-500/20 to-transparent border-gray-500/30 order-1 mt-6' : ''
+                }`}
+              >
+                {top3[1] && (
+                  <div className="flex flex-col items-center text-center">
+                    <div className="mb-3">
+                      {getRankIcon(2)}
+                    </div>
+                    <h3 className="font-bold text-lg mb-1 truncate w-full">
+                      {top3[1].username || top3[1].email?.split('@')[0] || 'User'}
+                    </h3>
+                    {top3[1].id === user?.id && (
+                      <Badge variant="secondary" size="sm" className="mb-2 bg-primary/20 text-primary">
+                        You
+                      </Badge>
+                    )}
+                    <div className="flex items-center gap-1 mb-2">
+                      <Flame className="w-4 h-4 text-warning" />
+                      <span className="text-2xl font-bold">{top3[1].total_streak || 0}</span>
+                    </div>
+                    <Badge variant="secondary" className="text-sm">
+                      #2
+                    </Badge>
+                  </div>
+                )}
+              </div>
+
+              {/* First Place */}
+              <div 
+                className={`rounded-xl p-4 shadow-lg border ${
+                  top3[0] ? 'bg-gradient-to-b from-yellow-500/20 to-transparent border-yellow-500/30 order-2' : ''
+                }`}
+              >
+                {top3[0] && (
+                  <div className="flex flex-col items-center text-center">
+                    <div className="mb-3">
+                      {getRankIcon(1)}
+                    </div>
+                    <h3 className="font-bold text-lg mb-1 truncate w-full">
+                      {top3[0].username || top3[0].email?.split('@')[0] || 'User'}
+                    </h3>
+                    {top3[0].id === user?.id && (
+                      <Badge variant="secondary" size="sm" className="mb-2 bg-primary/20 text-primary">
+                        You
+                      </Badge>
+                    )}
+                    <div className="flex items-center gap-1 mb-2">
+                      <Flame className="w-4 h-4 text-warning" />
+                      <span className="text-2xl font-bold">{top3[0].total_streak || 0}</span>
+                    </div>
+                    <Badge variant="secondary" className="text-sm">
+                      #1
+                    </Badge>
+                  </div>
+                )}
+              </div>
+
+              {/* Third Place */}
+              <div 
+                className={`rounded-xl p-4 shadow-lg border ${
+                  top3[2] ? 'bg-gradient-to-b from-orange-500/20 to-transparent border-orange-500/30 order-3 mt-6' : ''
+                }`}
+              >
+                {top3[2] && (
+                  <div className="flex flex-col items-center text-center">
+                    <div className="mb-3">
+                      {getRankIcon(3)}
+                    </div>
+                    <h3 className="font-bold text-lg mb-1 truncate w-full">
+                      {top3[2].username || top3[2].email?.split('@')[0] || 'User'}
+                    </h3>
+                    {top3[2].id === user?.id && (
+                      <Badge variant="secondary" size="sm" className="mb-2 bg-primary/20 text-primary">
+                        You
+                      </Badge>
+                    )}
+                    <div className="flex items-center gap-1 mb-2">
+                      <Flame className="w-4 h-4 text-warning" />
+                      <span className="text-2xl font-bold">{top3[2].total_streak || 0}</span>
+                    </div>
+                    <Badge variant="secondary" className="text-sm">
+                      #3
+                    </Badge>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            // Partial podium with fewer than 3 positions
+            <div className="col-span-3">
+              <div className="flex justify-center items-center gap-4">
+                {top3.map((leader, index) => {
+                  const displayName = leader.username || leader.email?.split('@')[0] || 'User';
+                  
+                  return (
+                    <div 
+                      key={leader.id}
+                      className={`rounded-xl p-4 shadow-lg border ${
+                        index === 0 ? 'bg-gradient-to-b from-yellow-500/20 to-transparent border-yellow-500/30' :
+                        'bg-gradient-to-b from-gray-500/20 to-transparent border-gray-500/30'
+                      }`}
+                    >
+                      <div className="flex flex-col items-center text-center">
+                        <div className="mb-3">
+                          {getRankIcon(index + 1)}
+                        </div>
+                        <h3 className="font-bold text-lg mb-1">{displayName}</h3>
+                        {leader.id === user?.id && (
+                          <Badge variant="secondary" size="sm" className="mb-2 bg-primary/20 text-primary">
+                            You
+                          </Badge>
+                        )}
+                        <div className="flex items-center gap-1 mb-2">
+                          <Flame className="w-4 h-4 text-warning" />
+                          <span className="text-2xl font-bold">{leader.total_streak || 0}</span>
+                        </div>
+                        <Badge variant="secondary" className="text-sm">
+                          #{index + 1}
+                        </Badge>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Podium - Carousel/Stack Layout */}
+        <div className="lg:hidden">
+          <div className="flex flex-col items-center gap-4 py-4">
+            {/* First Place (centered on mobile) */}
+            {top3[0] && (
+              <div 
+                className={`rounded-xl p-4 shadow-lg border w-full max-w-xs ${
+                  'bg-gradient-to-b from-yellow-500/20 to-transparent border-yellow-500/30'
+                }`}
+              >
+                <div className="flex flex-col items-center text-center">
+                  <div className="mb-3">
+                    {getRankIcon(1)}
+                  </div>
+                  <h3 className="font-bold text-lg mb-1">
+                    {top3[0].username || top3[0].email?.split('@')[0] || 'User'}
+                  </h3>
+                  {top3[0].id === user?.id && (
+                    <Badge variant="secondary" size="sm" className="mb-2 bg-primary/20 text-primary">
+                      You
+                    </Badge>
+                  )}
+                  <div className="flex items-center gap-1 mb-2">
+                    <Flame className="w-4 h-4 text-warning" />
+                    <span className="text-2xl font-bold">{top3[0].total_streak || 0}</span>
+                  </div>
+                  <Badge variant="secondary" className="text-sm">
+                    #1
+                  </Badge>
+                </div>
+              </div>
+            )}
+
+            {/* 2nd and 3rd places side by side on mobile */}
+            {(top3[1] || top3[2]) && (
+              <div className="grid grid-cols-2 gap-4 w-full max-w-xs">
+                {/* Second Place */}
+                {top3[1] && (
+                  <div 
+                    className={`rounded-xl p-4 shadow-lg border ${
+                      'bg-gradient-to-b from-gray-500/20 to-transparent border-gray-500/30'
+                    }`}
+                  >
+                    <div className="flex flex-col items-center text-center">
+                      <div className="mb-3">
+                        {getRankIcon(2)}
+                      </div>
+                      <h3 className="font-bold text-base mb-1 truncate w-full">
+                        {top3[1].username || top3[1].email?.split('@')[0] || 'User'}
+                      </h3>
+                      {top3[1].id === user?.id && (
+                        <Badge variant="secondary" size="sm" className="mb-2 bg-primary/20 text-primary">
+                          You
+                        </Badge>
+                      )}
+                      <div className="flex items-center gap-1 mb-2">
+                        <Flame className="w-3 h-3 text-warning" />
+                        <span className="text-xl font-bold">{top3[1].total_streak || 0}</span>
+                      </div>
+                      <Badge variant="secondary" className="text-xs">
+                        #2
+                      </Badge>
+                    </div>
+                  </div>
+                )}
+
+                {/* Third Place */}
+                {top3[2] && (
+                  <div 
+                    className={`rounded-xl p-4 shadow-lg border ${
+                      'bg-gradient-to-b from-orange-500/20 to-transparent border-orange-500/30'
+                    }`}
+                  >
+                    <div className="flex flex-col items-center text-center">
+                      <div className="mb-3">
+                        {getRankIcon(3)}
+                      </div>
+                      <h3 className="font-bold text-base mb-1 truncate w-full">
+                        {top3[2].username || top3[2].email?.split('@')[0] || 'User'}
+                      </h3>
+                      {top3[2].id === user?.id && (
+                        <Badge variant="secondary" size="sm" className="mb-2 bg-primary/20 text-primary">
+                          You
+                        </Badge>
+                      )}
+                      <div className="flex items-center gap-1 mb-2">
+                        <Flame className="w-3 h-3 text-warning" />
+                        <span className="text-xl font-bold">{top3[2].total_streak || 0}</span>
+                      </div>
+                      <Badge variant="secondary" className="text-xs">
+                        #3
+                      </Badge>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Legend for mobile */}
+        <div className="lg:hidden mt-4 pt-4 border-t border-border">
+          <p className="text-xs text-muted-foreground mb-3 text-center">LEGEND</p>
+          <div className="flex flex-wrap justify-center gap-4 text-xs">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                <Crown className="w-2 h-2 text-yellow-600" />
+              </div>
+              <span>1st Place</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-gray-500/20 flex items-center justify-center">
+                <Medal className="w-2 h-2 text-gray-600" />
+              </div>
+              <span>2nd Place</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-orange-500/20 flex items-center justify-center">
+                <Award className="w-2 h-2 text-orange-600" />
+              </div>
+              <span>3rd Place</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // User Stats Component
+  const UserStats = () => {
+    const currentUser = leaderboardData.find(u => u.id === user?.id);
+    const userStreak = currentUser?.total_streak || 0;
+    
+    if (leaderboardLoading) {
+      return (
+        <div className="mt-4 p-4 bg-muted/30 rounded-lg border-2 border-primary/20 animate-pulse">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-muted" />
+              <div>
+                <div className="h-3 w-16 bg-muted rounded mb-2" />
+                <div className="h-6 w-8 bg-muted rounded" />
+              </div>
+            </div>
+            <div>
+              <div className="h-3 w-20 bg-muted rounded mb-2" />
+              <div className="h-6 w-10 bg-muted rounded" />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (leaderboardError) {
+      return (
+        <div className="mt-4 p-4 bg-destructive/10 rounded-lg border-2 border-destructive/20">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-destructive/20 flex items-center justify-center">
+                <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-destructive" />
+              </div>
+              <div>
+                <p className="text-xs sm:text-sm text-destructive">Error loading rank</p>
+                <Button 
+                  variant="link" 
+                  size="sm" 
+                  onClick={() => setRefreshTrigger(prev => prev + 1)}
+                  className="p-0 h-auto text-xs"
+                >
+                  Retry
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="mt-4 p-4 bg-muted/30 rounded-lg border-2 border-primary/20">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-primary flex items-center justify-center">
+              <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            </div>
+            <div>
+              <p className="text-xs sm:text-sm text-muted-foreground">Your Rank</p>
+              <p className="text-lg sm:text-2xl font-bold">
+                {userRank ? `#${userRank}` : userStreak > 0 ? 'Ranking...' : 'Unranked'}
+              </p>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-xs sm:text-sm text-muted-foreground">Total Streaks</p>
+            <p className="text-lg sm:text-2xl font-bold text-primary">
+              {userStreak || 0}
+            </p>
+          </div>
+        </div>
+        
+        {userStreak === 0 && (
+          <div className="mt-3 pt-3 border-t border-primary/20">
+            <p className="text-xs text-muted-foreground">
+              Complete habits for 1 day to appear on the leaderboard!
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -325,6 +869,7 @@ const Dashboard = () => {
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-4 sm:space-y-6">
             <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+              {/* Left Column */}
               <div className="space-y-4 sm:space-y-6">
                 <Card>
                   <CardHeader className="pb-3 sm:pb-4">
@@ -355,6 +900,25 @@ const Dashboard = () => {
                     <WeeklyStreakChart userId={user?.id} refreshTrigger={refreshTrigger} />
                   </CardContent>
                 </Card>
+              </div>
+
+              {/* Right Column */}
+              <div className="space-y-4 sm:space-y-6">
+                <Card>
+                  <CardHeader className="pb-3 sm:pb-4">
+                    <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                      <Trophy className="w-4 h-4 sm:w-5 sm:h-5" />
+                      Top Performers
+                    </CardTitle>
+                    <CardDescription className="text-sm sm:text-base">
+                      Champion podium and your ranking
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <TopThreePodium />
+                    <UserStats />
+                  </CardContent>
+                </Card>
 
                 <Card>
                   <CardHeader className="pb-3 sm:pb-4">
@@ -373,23 +937,6 @@ const Dashboard = () => {
                         Recent activity will appear here
                       </p>
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div className="space-y-4 sm:space-y-6">
-                <Card>
-                  <CardHeader className="pb-3 sm:pb-4">
-                    <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                      <Trophy className="w-4 h-4 sm:w-5 sm:h-5" />
-                      Leaderboard
-                    </CardTitle>
-                    <CardDescription className="text-sm sm:text-base">
-                      See how you rank among others
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Leaderboard currentUserId={user?.id} refreshTrigger={refreshTrigger} />
                   </CardContent>
                 </Card>
               </div>
@@ -467,7 +1014,10 @@ const Dashboard = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Leaderboard currentUserId={user?.id} refreshTrigger={refreshTrigger} />
+                <Leaderboard 
+                  currentUserId={user?.id} 
+                  refreshTrigger={refreshTrigger}
+                />
               </CardContent>
             </Card>
 
@@ -482,8 +1032,13 @@ const Dashboard = () => {
                 <CardContent>
                   <div className="text-center py-6 sm:py-8">
                     <Trophy className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-warning" />
-                    <p className="text-2xl font-bold text-warning">#1</p>
-                    <p className="text-sm sm:text-base text-muted-foreground">You're doing great!</p>
+                    <p className="text-2xl font-bold text-warning">
+                      {userRank ? `#${userRank}` : 'Unranked'}
+                    </p>
+                    <p className="text-sm sm:text-base text-muted-foreground">
+                      {userRank && userRank <= 3 ? "You're in the top 3! 🎉" : 
+                       userRank && userRank <= 10 ? "You're in the top 10! 🎉" : "Keep going!"}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
