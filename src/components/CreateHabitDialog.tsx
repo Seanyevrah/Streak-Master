@@ -563,7 +563,7 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
                     <SelectContent>
                       <SelectItem value="daily">Daily</SelectItem>
                       <SelectItem value="weekly">Weekly</SelectItem>
-                      <SelectItem value="weekdays">Weekdays Only</SelectItem>
+                      <SelectItem value="weekdays">Custom Day</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -704,7 +704,7 @@ export const CreateHabitDialog = ({ open, onOpenChange, userId, onHabitCreated, 
                       <SelectContent>
                         <SelectItem value="daily">Daily</SelectItem>
                         <SelectItem value="weekly">Weekly</SelectItem>
-                        <SelectItem value="weekdays">Weekdays Only</SelectItem>
+                        <SelectItem value="weekdays">Custom Day</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
