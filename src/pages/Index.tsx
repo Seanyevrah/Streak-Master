@@ -66,7 +66,7 @@ const Index = () => {
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
             <Button
               size="lg"
-              onClick={() => navigate("/auth")}
+              onClick={() => navigate("/auth?tab=signup")} // Updated: Navigate to signup tab
               className="bg-gradient-primary text-base sm:text-lg px-6 sm:px-8 py-6 sm:py-7 h-auto"
             >
               <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
@@ -75,7 +75,7 @@ const Index = () => {
             <Button
               size="lg"
               variant="outline"
-              onClick={() => navigate("/auth")}
+              onClick={() => navigate("/auth")} // Keep default navigation for sign in
               className="text-base sm:text-lg px-6 sm:px-8 py-6 sm:py-7 h-auto"
             >
               Sign In
@@ -148,7 +148,7 @@ const Index = () => {
           </p>
           <Button
             size="lg"
-            onClick={() => navigate("/auth")}
+            onClick={() => navigate("/auth?tab=signup")} // Updated: Navigate to signup tab
             className="bg-gradient-primary text-base sm:text-lg px-8"
           >
             Start Free Trial
