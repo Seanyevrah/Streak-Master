@@ -466,37 +466,63 @@ const Dashboard = () => {
     return "px-4 py-6";
   };
 
-  // Responsive card padding - Fixed width, only height changes
+  // Card width classes - Fixed width for all screens
+  const getCardWidth = () => {
+    return "w-full";
+  };
+
+  // Card internal padding - Responsive but maintains fixed width
   const getCardPadding = () => {
     if (isMobile) {
-      return "p-3 w-full";
+      return "p-3";
     }
     if (isTablet) {
-      return "p-4 w-full";
+      return "p-4";
     }
-    return "p-5 w-full";
+    return "p-5";
   };
 
-  // Responsive card header padding - Fixed width
+  // Card header padding - Responsive
   const getCardHeaderPadding = () => {
     if (isMobile) {
-      return "px-3 pt-3 pb-2 w-full";
+      return "px-3 pt-3 pb-2";
     }
     if (isTablet) {
-      return "px-4 pt-4 pb-3 w-full";
+      return "px-4 pt-4 pb-3";
     }
-    return "px-5 pt-5 pb-4 w-full";
+    return "px-5 pt-5 pb-4";
   };
 
-  // Responsive card content padding - Fixed width
+  // Card content padding - Responsive
   const getCardContentPadding = () => {
     if (isMobile) {
-      return "px-3 pt-2 pb-3 w-full";
+      return "px-3 pt-2 pb-3";
     }
     if (isTablet) {
-      return "px-4 pt-3 pb-4 w-full";
+      return "px-4 pt-3 pb-4";
     }
-    return "px-5 pt-4 pb-5 w-full";
+    return "px-5 pt-4 pb-5";
+  };
+
+  // Text size for card titles based on screen size
+  const getCardTitleSize = () => {
+    if (isMobile) {
+      return "text-sm";
+    }
+    return "text-base";
+  };
+
+  // Text size for card descriptions
+  const getCardDescriptionSize = () => {
+    if (isMobile) {
+      return "text-xs";
+    }
+    return "text-sm";
+  };
+
+  // Text truncation utility
+  const getTruncateClass = () => {
+    return "truncate";
   };
 
   // Top 3 Podium Component with mobile sizing - Fixed width
@@ -766,7 +792,7 @@ const Dashboard = () => {
         <div className="flex items-center justify-between w-full">
           <div className="min-w-0 flex-1">
             <p className="text-xs font-medium text-green-600 truncate">Completed</p>
-            <p className="text-lg font-bold">{dailyStats.completed}</p>
+            <p className="text-lg font-bold truncate">{dailyStats.completed}</p>
           </div>
           <div className="p-1.5 bg-green-500/20 rounded-lg flex-shrink-0 ml-1">
             <CheckCircle className="w-3.5 h-3.5 text-green-500" />
@@ -779,7 +805,7 @@ const Dashboard = () => {
         <div className="flex items-center justify-between w-full">
           <div className="min-w-0 flex-1">
             <p className="text-xs font-medium text-blue-600 truncate">Pending</p>
-            <p className="text-lg font-bold">{dailyStats.pending}</p>
+            <p className="text-lg font-bold truncate">{dailyStats.pending}</p>
           </div>
           <div className="p-1.5 bg-blue-500/20 rounded-lg flex-shrink-0 ml-1">
             <Clock className="w-3.5 h-3.5 text-blue-500" />
@@ -792,7 +818,7 @@ const Dashboard = () => {
         <div className="flex items-center justify-between w-full">
           <div className="min-w-0 flex-1">
             <p className="text-xs font-medium text-purple-600 truncate">Streak</p>
-            <p className="text-lg font-bold">{dailyStats.streak}</p>
+            <p className="text-lg font-bold truncate">{dailyStats.streak}</p>
           </div>
           <div className="p-1.5 bg-purple-500/20 rounded-lg flex-shrink-0 ml-1">
             <Flame className="w-3.5 h-3.5 text-purple-500" />
@@ -1231,19 +1257,20 @@ const Dashboard = () => {
             )}>
               {/* Left Column - Progress & Analytics */}
               <div className="space-y-4 w-full">
-                <Card className={cn("w-full", getCardPadding())}>
+                <Card className={cn("w-full", getCardPadding(), getCardWidth())}>
                   <CardHeader className={cn("pb-2 w-full", getCardHeaderPadding())}>
                     <CardTitle className={cn(
                       "flex items-center gap-1.5 w-full",
-                      isMobile ? "text-base" : "text-lg"
+                      getCardTitleSize()
                     )}>
                       <BarChart3 className={cn(
                         isMobile ? "w-3.5 h-3.5" : "w-4 h-4"
                       )} />
-                      Today's Progress
+                      <span className={getTruncateClass()}>Today's Progress</span>
                     </CardTitle>
                     <CardDescription className={cn(
-                      isMobile ? "text-xs" : "text-sm",
+                      getCardDescriptionSize(),
+                      getTruncateClass(),
                       "w-full"
                     )}>
                       Your completion rate for today
@@ -1253,14 +1280,14 @@ const Dashboard = () => {
                     <div className="space-y-4 w-full">
                       <div className="w-full">
                         <div className="flex items-center justify-between mb-2 w-full">
-                          <div className="flex-1">
-                            <span className="text-sm font-medium">Daily Completion</span>
-                            <p className="text-xs text-muted-foreground">
+                          <div className="min-w-0 flex-1">
+                            <span className="text-sm font-medium truncate">Daily Completion</span>
+                            <p className="text-xs text-muted-foreground truncate">
                               {dailyStats.completed} of {dailyStats.total} habits completed
                             </p>
                           </div>
                           <span className={cn(
-                            "font-bold flex-shrink-0 ml-2",
+                            "font-bold flex-shrink-0 ml-2 truncate",
                             isMobile ? "text-lg" : "text-xl"
                           )}>{dailyStats.completionRate}%</span>
                         </div>
@@ -1275,33 +1302,34 @@ const Dashboard = () => {
                             <Activity className="w-3.5 h-3.5 text-primary flex-shrink-0" />
                             <span className="text-xs font-medium truncate">Active Habits</span>
                           </div>
-                          <p className="text-xl font-bold w-full">{dailyStats.total}</p>
+                          <p className="text-xl font-bold truncate w-full">{dailyStats.total}</p>
                         </div>
                         <div className="bg-muted/20 rounded-lg p-3 w-full">
                           <div className="flex items-center gap-1.5 mb-1.5 w-full">
                             <TrendingUpIcon className="w-3.5 h-3.5 text-primary flex-shrink-0" />
                             <span className="text-xs font-medium truncate">Best Streak</span>
                           </div>
-                          <p className="text-xl font-bold w-full">{dailyStats.bestStreak} days</p>
+                          <p className="text-xl font-bold truncate w-full">{dailyStats.bestStreak} days</p>
                         </div>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className={cn("w-full", getCardPadding())}>
+                <Card className={cn("w-full", getCardPadding(), getCardWidth())}>
                   <CardHeader className={cn("pb-2 w-full", getCardHeaderPadding())}>
                     <CardTitle className={cn(
                       "flex items-center gap-1.5 w-full",
-                      isMobile ? "text-base" : "text-lg"
+                      getCardTitleSize()
                     )}>
                       <Calendar className={cn(
                         isMobile ? "w-3.5 h-3.5" : "w-4 h-4"
                       )} />
-                      Weekly Progress
+                      <span className={getTruncateClass()}>Weekly Progress</span>
                     </CardTitle>
                     <CardDescription className={cn(
-                      isMobile ? "text-xs" : "text-sm",
+                      getCardDescriptionSize(),
+                      getTruncateClass(),
                       "w-full"
                     )}>
                       Your streak performance this week
@@ -1310,7 +1338,7 @@ const Dashboard = () => {
                   <CardContent className={cn("w-full", getCardContentPadding())}>
                     <div className="space-y-4 w-full">
                       <div className="w-full">
-                        <p className="text-sm font-medium mb-2 w-full">Daily habit completion rate</p>
+                        <p className="text-sm font-medium mb-2 truncate w-full">Daily habit completion rate</p>
                         <WeeklyStreakChart 
                           userId={user?.id} 
                           refreshTrigger={refreshTrigger}
@@ -1319,7 +1347,7 @@ const Dashboard = () => {
                       </div>
                       
                       <div className="text-xs text-muted-foreground w-full">
-                        <p className="font-medium mb-1.5 w-full">Weekly Insights</p>
+                        <p className="font-medium mb-1.5 truncate w-full">Weekly Insights</p>
                         <ul className="space-y-1 w-full">
                           <li className="flex items-center gap-1.5 w-full">
                             <div className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0"></div>
@@ -1338,19 +1366,20 @@ const Dashboard = () => {
 
               {/* Right Column - Leaderboard & Activity */}
               <div className="space-y-4 w-full">
-                <Card className={cn("w-full", getCardPadding())}>
+                <Card className={cn("w-full", getCardPadding(), getCardWidth())}>
                   <CardHeader className={cn("pb-2 w-full", getCardHeaderPadding())}>
                     <CardTitle className={cn(
                       "flex items-center gap-1.5 w-full",
-                      isMobile ? "text-base" : "text-lg"
+                      getCardTitleSize()
                     )}>
                       <Trophy className={cn(
                         isMobile ? "w-3.5 h-3.5" : "w-4 h-4"
                       )} />
-                      Top Performers
+                      <span className={getTruncateClass()}>Top Performers</span>
                     </CardTitle>
                     <CardDescription className={cn(
-                      isMobile ? "text-xs" : "text-sm",
+                      getCardDescriptionSize(),
+                      getTruncateClass(),
                       "w-full"
                     )}>
                       Leaderboard podium
@@ -1362,19 +1391,20 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
 
-                <Card className={cn("w-full", getCardPadding())}>
+                <Card className={cn("w-full", getCardPadding(), getCardWidth())}>
                   <CardHeader className={cn("pb-2 w-full", getCardHeaderPadding())}>
                     <CardTitle className={cn(
                       "flex items-center gap-1.5 w-full",
-                      isMobile ? "text-base" : "text-lg"
+                      getCardTitleSize()
                     )}>
                       <Activity className={cn(
                         isMobile ? "w-3.5 h-3.5" : "w-4 h-4"
                       )} />
-                      Recent Activity
+                      <span className={getTruncateClass()}>Recent Activity</span>
                     </CardTitle>
                     <CardDescription className={cn(
-                      isMobile ? "text-xs" : "text-sm",
+                      getCardDescriptionSize(),
+                      getTruncateClass(),
                       "w-full"
                     )}>
                       Your latest habit completions
@@ -1391,7 +1421,7 @@ const Dashboard = () => {
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="w-full text-xs h-7"
+                        className="w-full text-xs h-7 truncate"
                         onClick={() => setActiveTab("habits")}
                       >
                         View All Habits ({habits.length})
@@ -1405,19 +1435,20 @@ const Dashboard = () => {
 
           {/* Other Tabs with real data */}
           <TabsContent value="habits" className="space-y-4 w-full">
-            <Card className={cn("w-full", getCardPadding())}>
+            <Card className={cn("w-full", getCardPadding(), getCardWidth())}>
               <CardHeader className={cn("w-full", getCardHeaderPadding())}>
                 <CardTitle className={cn(
                   "flex items-center gap-1.5 w-full",
-                  isMobile ? "text-base" : "text-lg"
+                  getCardTitleSize()
                 )}>
                   <List className={cn(
                     isMobile ? "w-3.5 h-3.5" : "w-4 h-4"
                   )} />
-                  Your Habits ({habits.length})
+                  <span className={getTruncateClass()}>Your Habits ({habits.length})</span>
                 </CardTitle>
                 <CardDescription className={cn(
-                  isMobile ? "text-xs" : "text-sm",
+                  getCardDescriptionSize(),
+                  getTruncateClass(),
                   "w-full"
                 )}>
                   Manage and track all your habits in one place
@@ -1443,19 +1474,20 @@ const Dashboard = () => {
 
           <TabsContent value="analytics" className="space-y-4 w-full">
             <div className="grid gap-4 w-full">
-              <Card className={cn("w-full", getCardPadding())}>
+              <Card className={cn("w-full", getCardPadding(), getCardWidth())}>
                 <CardHeader className={cn("w-full", getCardHeaderPadding())}>
                   <CardTitle className={cn(
                     "flex items-center gap-1.5 w-full",
-                    isMobile ? "text-base" : "text-lg"
+                    getCardTitleSize()
                   )}>
                     <BarChart3 className={cn(
                       isMobile ? "w-3.5 h-3.5" : "w-4 h-4"
                     )} />
-                    Detailed Analytics
+                    <span className={getTruncateClass()}>Detailed Analytics</span>
                   </CardTitle>
                   <CardDescription className={cn(
-                    isMobile ? "text-xs" : "text-sm",
+                    getCardDescriptionSize(),
+                    getTruncateClass(),
                     "w-full"
                   )}>
                     Comprehensive view of your habit performance
@@ -1471,19 +1503,20 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
 
-              <Card className={cn("w-full", getCardPadding())}>
+              <Card className={cn("w-full", getCardPadding(), getCardWidth())}>
                 <CardHeader className={cn("w-full", getCardHeaderPadding())}>
                   <CardTitle className={cn(
                     "flex items-center gap-1.5 w-full",
-                    isMobile ? "text-base" : "text-lg"
+                    getCardTitleSize()
                   )}>
                     <Calendar className={cn(
                       isMobile ? "w-3.5 h-3.5" : "w-4 h-4"
                     )} />
-                    Weekly Streak Details
+                    <span className={getTruncateClass()}>Weekly Streak Details</span>
                   </CardTitle>
                   <CardDescription className={cn(
-                    isMobile ? "text-xs" : "text-sm",
+                    getCardDescriptionSize(),
+                    getTruncateClass(),
                     "w-full"
                   )}>
                     Day-by-day breakdown of your progress
@@ -1501,19 +1534,20 @@ const Dashboard = () => {
           </TabsContent>
 
           <TabsContent value="leaderboard" className="space-y-4 w-full">
-            <Card className={cn("w-full", getCardPadding())}>
+            <Card className={cn("w-full", getCardPadding(), getCardWidth())}>
               <CardHeader className={cn("w-full", getCardHeaderPadding())}>
                 <CardTitle className={cn(
                   "flex items-center gap-1.5 w-full",
-                  isMobile ? "text-base" : "text-lg"
+                  getCardTitleSize()
                 )}>
                   <Trophy className={cn(
                     isMobile ? "w-3.5 h-3.5" : "w-4 h-4"
                   )} />
-                  Global Leaderboard
+                  <span className={getTruncateClass()}>Global Leaderboard</span>
                 </CardTitle>
                 <CardDescription className={cn(
-                  isMobile ? "text-xs" : "text-sm",
+                  getCardDescriptionSize(),
+                  getTruncateClass(),
                   "w-full"
                 )}>
                   Compete with others and stay motivated
@@ -1532,14 +1566,15 @@ const Dashboard = () => {
               "grid gap-4 w-full",
               isMobile && !isPortrait ? "grid-cols-1" : "lg:grid-cols-2"
             )}>
-              <Card className={cn("w-full", getCardPadding())}>
+              <Card className={cn("w-full", getCardPadding(), getCardWidth())}>
                 <CardHeader className={cn("w-full", getCardHeaderPadding())}>
                   <CardTitle className={cn(
-                    "text-base w-full",
-                    isMobile ? "text-base" : "text-lg"
+                    "text-base w-full truncate",
+                    getCardTitleSize()
                   )}>Your Ranking</CardTitle>
                   <CardDescription className={cn(
-                    isMobile ? "text-xs" : "text-sm",
+                    getCardDescriptionSize(),
+                    getTruncateClass(),
                     "w-full"
                   )}>
                     See how you compare to others
@@ -1552,12 +1587,12 @@ const Dashboard = () => {
                       isMobile ? "w-8 h-8" : "w-10 h-10"
                     )} />
                     <p className={cn(
-                      "font-bold text-warning w-full",
+                      "font-bold text-warning w-full truncate",
                       isMobile ? "text-xl" : "text-2xl"
                     )}>
                       {userRank ? `#${userRank}` : 'Unranked'}
                     </p>
-                    <p className="text-muted-foreground mt-1.5 text-xs sm:text-sm w-full">
+                    <p className="text-muted-foreground mt-1.5 text-xs sm:text-sm w-full truncate">
                       {userRank && userRank <= 3 ? "You're in the top 3! 🎉" : 
                        userRank && userRank <= 10 ? "You're in the top 10! 🎉" : 
                        dailyStats.streak > 0 ? "Keep going to climb the ranks!" : "Start completing habits to appear on the leaderboard!"}
@@ -1566,14 +1601,15 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
 
-              <Card className={cn("w-full", getCardPadding())}>
+              <Card className={cn("w-full", getCardPadding(), getCardWidth())}>
                 <CardHeader className={cn("w-full", getCardHeaderPadding())}>
                   <CardTitle className={cn(
-                    "text-base w-full",
-                    isMobile ? "text-base" : "text-lg"
+                    "text-base w-full truncate",
+                    getCardTitleSize()
                   )}>Streak Stats</CardTitle>
                   <CardDescription className={cn(
-                    isMobile ? "text-xs" : "text-sm",
+                    getCardDescriptionSize(),
+                    getTruncateClass(),
                     "w-full"
                   )}>
                     Your personal streak achievements
@@ -1583,19 +1619,19 @@ const Dashboard = () => {
                   <div className="space-y-4 py-2 w-full">
                     <div className="flex items-center justify-between w-full">
                       <span className="text-sm truncate flex-1">Current Streak</span>
-                      <span className="font-bold text-lg flex-shrink-0 ml-2">{dailyStats.streak} days</span>
+                      <span className="font-bold text-lg flex-shrink-0 ml-2 truncate">{dailyStats.streak} days</span>
                     </div>
                     <div className="flex items-center justify-between w-full">
                       <span className="text-sm truncate flex-1">Best Streak</span>
-                      <span className="font-bold text-lg flex-shrink-0 ml-2">{dailyStats.bestStreak} days</span>
+                      <span className="font-bold text-lg flex-shrink-0 ml-2 truncate">{dailyStats.bestStreak} days</span>
                     </div>
                     <div className="flex items-center justify-between w-full">
                       <span className="text-sm truncate flex-1">Total Habits</span>
-                      <span className="font-bold text-lg flex-shrink-0 ml-2">{dailyStats.total}</span>
+                      <span className="font-bold text-lg flex-shrink-0 ml-2 truncate">{dailyStats.total}</span>
                     </div>
                     <div className="flex items-center justify-between w-full">
                       <span className="text-sm truncate flex-1">Today's Progress</span>
-                      <span className="font-bold text-lg flex-shrink-0 ml-2">{dailyStats.completionRate}%</span>
+                      <span className="font-bold text-lg flex-shrink-0 ml-2 truncate">{dailyStats.completionRate}%</span>
                     </div>
                   </div>
                 </CardContent>
