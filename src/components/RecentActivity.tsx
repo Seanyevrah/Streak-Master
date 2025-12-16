@@ -439,15 +439,6 @@ export const RecentActivity = ({ userId, refreshTrigger }: RecentActivityProps) 
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Activity className="w-4 h-4" />
-          Recent Activity
-        </CardTitle>
-        <CardDescription>
-          Your latest habit completions and achievements
-        </CardDescription>
-      </CardHeader>
       <CardContent>
         <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/40">
           {activities.map((activity) => (

@@ -57,12 +57,23 @@ const Dashboard = () => {
   const [userRank, setUserRank] = useState<number | null>(null);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [leaderboardError, setLeaderboardError] = useState<string | null>(null);
+  
+  // Real data states
   const [dailyStats, setDailyStats] = useState({
-    completed: 2,
-    pending: 3,
-    total: 5,
-    streak: 2,
-    completionRate: 40
+    completed: 0,
+    pending: 0,
+    total: 0,
+    streak: 0,
+    completionRate: 0,
+    totalStreak: 0,
+    bestStreak: 0,
+    weeklyAverage: 0
+  });
+  const [habits, setHabits] = useState<any[]>([]);
+  const [habitsLoading, setHabitsLoading] = useState(true);
+  const [weeklyInsights, setWeeklyInsights] = useState({
+    mostProductiveDay: "",
+    averageCompletion: 0
   });
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -99,8 +110,12 @@ const Dashboard = () => {
 
       setUser(session.user);
       
-      // Fetch user's daily stats
-      await fetchDailyStats(session.user.id);
+      // Fetch user's data
+      await Promise.all([
+        fetchDailyStats(session.user.id),
+        fetchUserHabits(session.user.id),
+        fetchUserStreakData(session.user.id)
+      ]);
       setLoading(false);
     };
 
@@ -112,6 +127,8 @@ const Dashboard = () => {
       } else if (session) {
         setUser(session.user);
         fetchDailyStats(session.user.id);
+        fetchUserHabits(session.user.id);
+        fetchUserStreakData(session.user.id);
       }
     });
 
@@ -229,16 +246,176 @@ const Dashboard = () => {
 
   const fetchDailyStats = async (userId: string) => {
     try {
-      // Mock data - replace with actual API calls
-      setDailyStats({
-        completed: 2,
-        pending: 3,
-        total: 5,
-        streak: 2,
-        completionRate: 40
-      });
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Fetch today's habit logs (completions)
+      const { data: habitLogs, error: logsError } = await supabase
+        .from('habit_logs')
+        .select(`
+          habit_id,
+          status,
+          log_date
+        `)
+        .eq('log_date', today)
+        .in('status', ['done', 'skipped', 'missed', 'pending']);
+
+      if (logsError) {
+        console.error("Error fetching habit logs:", logsError);
+        return;
+      }
+
+      // Fetch user's active habits
+      const { data: userHabits, error: habitsError } = await supabase
+        .from('habits')
+        .select('*')
+        .eq('user_id', userId)
+        // Assuming you have an is_active field or all habits are active
+        // If not, remove the .eq('is_active', true) line
+        .order('created_at', { ascending: false });
+
+      if (habitsError) {
+        console.error("Error fetching habits:", habitsError);
+        return;
+      }
+
+      const totalHabits = userHabits?.length || 0;
+      const completedToday = habitLogs?.filter(log => log.status === 'done').length || 0;
+      const pendingToday = Math.max(0, totalHabits - completedToday);
+      const completionRate = totalHabits > 0 ? Math.round((completedToday / totalHabits) * 100) : 0;
+
+      setDailyStats(prev => ({
+        ...prev,
+        completed: completedToday,
+        pending: pendingToday,
+        total: totalHabits,
+        completionRate: completionRate
+      }));
     } catch (error) {
       console.error("Error fetching daily stats:", error);
+    }
+  };
+
+  const fetchUserHabits = async (userId: string) => {
+    try {
+      setHabitsLoading(true);
+      const { data, error } = await supabase
+        .from('habits')
+        .select(`
+          *,
+          categories (
+            name
+          )
+        `)
+        .eq('user_id', userId)
+        // Remove if you don't have is_active field
+        // .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Error fetching habits:", error);
+        toast.error("Could not load habits");
+        return;
+      }
+
+      setHabits(data || []);
+    } catch (error) {
+      console.error("Error fetching habits:", error);
+    } finally {
+      setHabitsLoading(false);
+    }
+  };
+
+  const fetchUserStreakData = async (userId: string) => {
+    try {
+      // Fetch user's current streak from profiles
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('total_streak')
+        .eq('id', userId)
+        .single();
+
+      if (profileError) {
+        console.error("Error fetching profile streak:", profileError);
+        return;
+      }
+
+      // Calculate best streak from habits
+      const { data: userHabits, error: habitsError } = await supabase
+        .from('habits')
+        .select('current_streak')
+        .eq('user_id', userId);
+
+      if (habitsError) {
+        console.error("Error fetching habits for streak:", habitsError);
+        return;
+      }
+
+      // Calculate best streak from all habits
+      const bestStreak = userHabits?.reduce((max, habit) => 
+        Math.max(max, habit.current_streak || 0), 0) || 0;
+
+      // Fetch weekly habit logs for insights
+      const last7Days = new Date();
+      last7Days.setDate(last7Days.getDate() - 7);
+      
+      const { data: weeklyLogs, error: weeklyError } = await supabase
+        .from('habit_logs')
+        .select(`
+          log_date,
+          status,
+          habits!inner (
+            user_id
+          )
+        `)
+        .eq('habits.user_id', userId)
+        .gte('log_date', last7Days.toISOString().split('T')[0])
+        .in('status', ['done', 'skipped', 'missed', 'pending']);
+
+      if (weeklyError) {
+        console.error("Error fetching weekly logs:", weeklyError);
+        return;
+      }
+
+      // Calculate weekly insights
+      const dayCounts: Record<string, number> = {};
+      let totalCompletions = 0;
+      
+      weeklyLogs?.forEach(log => {
+        if (log.status === 'done') {
+          const date = new Date(log.log_date);
+          const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+          dayCounts[dayName] = (dayCounts[dayName] || 0) + 1;
+          totalCompletions++;
+        }
+      });
+
+      let mostProductiveDay = "";
+      let maxCount = 0;
+      
+      Object.entries(dayCounts).forEach(([day, count]) => {
+        if (count > maxCount) {
+          maxCount = count;
+          mostProductiveDay = day;
+        }
+      });
+
+      const weeklyAverage = habits.length > 0 
+        ? Math.round((totalCompletions / (habits.length * 7)) * 100)
+        : 0;
+
+      setWeeklyInsights({
+        mostProductiveDay: mostProductiveDay || "No data",
+        averageCompletion: weeklyAverage
+      });
+
+      setDailyStats(prev => ({
+        ...prev,
+        streak: profile?.total_streak || 0,
+        totalStreak: profile?.total_streak || 0,
+        bestStreak: bestStreak
+      }));
+    } catch (error) {
+      console.error("Error fetching streak data:", error);
     }
   };
 
@@ -250,6 +427,11 @@ const Dashboard = () => {
 
   const triggerRefresh = () => {
     setRefreshTrigger(prev => prev + 1);
+    if (user?.id) {
+      fetchDailyStats(user.id);
+      fetchUserHabits(user.id);
+      fetchUserStreakData(user.id);
+    }
   };
 
   const handleEditHabit = (habit: any) => {
@@ -513,7 +695,7 @@ const Dashboard = () => {
   // User Stats Component with mobile sizing
   const UserStats = () => {
     const currentUser = leaderboardData.find(u => u.id === user?.id);
-    const userStreak = currentUser?.total_streak || 0;
+    const userStreak = currentUser?.total_streak || dailyStats.streak;
     
     return (
       <div className={cn(
@@ -719,7 +901,7 @@ const Dashboard = () => {
                 </div>
                 <div className={cn(
                   "h-3 bg-muted rounded",
-                  isMobile ? "w-32" : "w-36"
+                    isMobile ? "w-32" : "w-36"
                 )}></div>
                 <div className="h-32 bg-muted/30 rounded-lg mt-3"></div>
               </div>
@@ -1042,7 +1224,7 @@ const Dashboard = () => {
             </DropdownMenu>
           </div>
 
-          {/* Overview Tab - Fixed mobile sizing */}
+          {/* Overview Tab - Now with real data */}
           <TabsContent value="overview" className="space-y-4">
             <div className={cn(
               "grid gap-4",
@@ -1100,7 +1282,7 @@ const Dashboard = () => {
                             <TrendingUpIcon className="w-3.5 h-3.5 text-primary" />
                             <span className="text-xs font-medium">Best Streak</span>
                           </div>
-                          <p className="text-xl font-bold">14 days</p>
+                          <p className="text-xl font-bold">{dailyStats.bestStreak} days</p>
                         </div>
                       </div>
                     </div>
@@ -1140,11 +1322,11 @@ const Dashboard = () => {
                         <ul className="space-y-1">
                           <li className="flex items-center gap-1.5">
                             <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                            <span>Most productive day: Tuesday</span>
+                            <span>Most productive day: {weeklyInsights.mostProductiveDay || "No data yet"}</span>
                           </li>
                           <li className="flex items-center gap-1.5">
                             <div className="w-1.5 h-1.5 rounded-full bg-yellow-500"></div>
-                            <span>Average daily completion: 68%</span>
+                            <span>Average daily completion: {weeklyInsights.averageCompletion}%</span>
                           </li>
                         </ul>
                       </div>
@@ -1192,7 +1374,7 @@ const Dashboard = () => {
                     <CardDescription className={cn(
                       isMobile ? "text-xs" : "text-sm"
                     )}>
-                      Your latest habit completions
+                      Your latest habit completions and achievements
                     </CardDescription>
                   </CardHeader>
                   <CardContent className={getCardContentPadding()}>
@@ -1209,7 +1391,7 @@ const Dashboard = () => {
                         className="w-full text-xs h-7"
                         onClick={() => setActiveTab("habits")}
                       >
-                        View All Habits
+                        View All Habits ({habits.length})
                       </Button>
                     </div>
                   </CardContent>
@@ -1218,7 +1400,7 @@ const Dashboard = () => {
             </div>
           </TabsContent>
 
-          {/* Other Tabs with fixed mobile sizing */}
+          {/* Other Tabs with real data */}
           <TabsContent value="habits" className="space-y-4">
             <Card className={cn(getCardPadding())}>
               <CardHeader className={getCardHeaderPadding()}>
@@ -1229,7 +1411,7 @@ const Dashboard = () => {
                   <List className={cn(
                     isMobile ? "w-3.5 h-3.5" : "w-4 h-4"
                   )} />
-                  Your Habits
+                  Your Habits ({habits.length})
                 </CardTitle>
                 <CardDescription className={cn(
                   isMobile ? "text-xs" : "text-sm"
@@ -1238,13 +1420,19 @@ const Dashboard = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className={getCardContentPadding()}>
-                <HabitList 
-                  userId={user?.id} 
-                  onUpdate={triggerRefresh} 
-                  refreshTrigger={refreshTrigger}
-                  onEditHabit={handleEditHabit}
-                  compact={isMobile}
-                />
+                {habitsLoading ? (
+                  <div className="flex justify-center items-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  </div>
+                ) : (
+                  <HabitList 
+                    userId={user?.id} 
+                    onUpdate={triggerRefresh} 
+                    refreshTrigger={refreshTrigger}
+                    onEditHabit={handleEditHabit}
+                    compact={isMobile}
+                  />
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -1362,7 +1550,8 @@ const Dashboard = () => {
                     </p>
                     <p className="text-muted-foreground mt-1.5 text-xs sm:text-sm">
                       {userRank && userRank <= 3 ? "You're in the top 3! 🎉" : 
-                       userRank && userRank <= 10 ? "You're in the top 10! 🎉" : "Keep going to climb the ranks!"}
+                       userRank && userRank <= 10 ? "You're in the top 10! 🎉" : 
+                       dailyStats.streak > 0 ? "Keep going to climb the ranks!" : "Start completing habits to appear on the leaderboard!"}
                     </p>
                   </div>
                 </CardContent>
@@ -1372,25 +1561,31 @@ const Dashboard = () => {
                 <CardHeader className={getCardHeaderPadding()}>
                   <CardTitle className={cn(
                     isMobile ? "text-base" : "text-lg"
-                  )}>Achievements</CardTitle>
+                  )}>Streak Stats</CardTitle>
                   <CardDescription className={cn(
                     isMobile ? "text-xs" : "text-sm"
                   )}>
-                    Unlock achievements as you progress
+                    Your personal streak achievements
                   </CardDescription>
                 </CardHeader>
                 <CardContent className={getCardContentPadding()}>
-                  <div className="text-center py-4 sm:py-6">
-                    <Target className={cn(
-                      "mx-auto mb-3 text-muted-foreground opacity-50",
-                      isMobile ? "w-8 h-8" : "w-10 h-10"
-                    )} />
-                    <p className="text-muted-foreground text-xs sm:text-sm">
-                      Achievements coming soon!
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Complete more habits to unlock achievements
-                    </p>
+                  <div className="space-y-4 py-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Current Streak</span>
+                      <span className="font-bold text-lg">{dailyStats.streak} days</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Best Streak</span>
+                      <span className="font-bold text-lg">{dailyStats.bestStreak} days</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Total Habits</span>
+                      <span className="font-bold text-lg">{dailyStats.total}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Today's Progress</span>
+                      <span className="font-bold text-lg">{dailyStats.completionRate}%</span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
