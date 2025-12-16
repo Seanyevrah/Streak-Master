@@ -397,15 +397,6 @@ export const RecentActivity = ({ userId, refreshTrigger }: RecentActivityProps) 
   if (activities.length === 0) {
     return (
       <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Activity className="w-4 h-4" />
-            Recent Activity
-          </CardTitle>
-          <CardDescription>
-            Your latest habit completions and achievements
-          </CardDescription>
-        </CardHeader>
         <CardContent>
           <div className="text-center py-8">
             <Activity className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
