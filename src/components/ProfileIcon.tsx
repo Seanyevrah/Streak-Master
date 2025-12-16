@@ -126,19 +126,6 @@ export const ProfileIcon = ({ user, onSignOut }: ProfileIconProps) => {
             <p className="text-sm font-medium leading-none">
               {profileData?.username || user.email?.split('@')[0] || "User"}
             </p>
-            {profileData?.total_streak !== undefined && (
-              <div className="flex items-center gap-2 pt-2">
-                <Badge variant="secondary" className="text-xs">
-                  <Trophy className="w-3 h-3 mr-1" />
-                  {profileData.total_streak} streak
-                </Badge>
-                {profileData.rank && (
-                  <Badge variant="outline" className="text-xs">
-                    Rank #{profileData.rank}
-                  </Badge>
-                )}
-              </div>
-            )}
           </div>
         </DropdownMenuLabel>
         
