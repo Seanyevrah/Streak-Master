@@ -1309,7 +1309,6 @@ const Dashboard = () => {
                   <CardContent className={getCardContentPadding()}>
                     <div className="space-y-4">
                       <div>
-                        <p className="text-sm font-medium mb-2">Daily habit completion rate</p>
                         <WeeklyStreakChart 
                           userId={user?.id} 
                           refreshTrigger={refreshTrigger}
