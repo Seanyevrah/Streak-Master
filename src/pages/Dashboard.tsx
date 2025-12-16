@@ -444,10 +444,10 @@ const Dashboard = () => {
     setTimeout(() => setEditingHabit(null), 200);
   };
 
-  // Responsive grid columns for daily stats
+  // Responsive grid columns for daily stats - Fixed width cards
   const getStatsGridCols = () => {
     if (isMobile) {
-      return isPortrait ? "grid-cols-3" : "grid-cols-3";
+      return "grid-cols-3";
     }
     if (isTablet) {
       return "grid-cols-3";
@@ -455,10 +455,10 @@ const Dashboard = () => {
     return "grid-cols-3";
   };
 
-  // Responsive container padding
+  // Responsive container padding - Fixed width
   const getContainerPadding = () => {
     if (isMobile) {
-      return isPortrait ? "px-3 py-3" : "px-4 py-4";
+      return "px-3 py-3";
     }
     if (isTablet) {
       return "px-4 py-5";
@@ -466,64 +466,64 @@ const Dashboard = () => {
     return "px-4 py-6";
   };
 
-  // Responsive card padding - fixed for mobile
+  // Responsive card padding - Fixed width, only height changes
   const getCardPadding = () => {
     if (isMobile) {
-      return "p-3";
+      return "p-3 w-full";
     }
     if (isTablet) {
-      return "p-4";
+      return "p-4 w-full";
     }
-    return "p-5";
+    return "p-5 w-full";
   };
 
-  // Responsive card header padding
+  // Responsive card header padding - Fixed width
   const getCardHeaderPadding = () => {
     if (isMobile) {
-      return "px-3 pt-3 pb-2";
+      return "px-3 pt-3 pb-2 w-full";
     }
     if (isTablet) {
-      return "px-4 pt-4 pb-3";
+      return "px-4 pt-4 pb-3 w-full";
     }
-    return "px-5 pt-5 pb-4";
+    return "px-5 pt-5 pb-4 w-full";
   };
 
-  // Responsive card content padding
+  // Responsive card content padding - Fixed width
   const getCardContentPadding = () => {
     if (isMobile) {
-      return "px-3 pt-2 pb-3";
+      return "px-3 pt-2 pb-3 w-full";
     }
     if (isTablet) {
-      return "px-4 pt-3 pb-4";
+      return "px-4 pt-3 pb-4 w-full";
     }
-    return "px-5 pt-4 pb-5";
+    return "px-5 pt-4 pb-5 w-full";
   };
 
-  // Top 3 Podium Component with mobile sizing
+  // Top 3 Podium Component with mobile sizing - Fixed width
   const TopThreePodium = () => {
     if (leaderboardLoading) {
       return (
-        <div className="animate-pulse">
+        <div className="animate-pulse w-full">
           <div className={cn(
-            "flex items-end justify-center gap-2 py-4",
+            "flex items-end justify-center gap-2 py-4 w-full",
             isMobile && !isPortrait && "gap-1 py-3"
           )}>
             {[2, 1, 3].map((i) => (
-              <div key={i} className="flex flex-col items-center">
+              <div key={i} className="flex flex-col items-center flex-1 max-w-[33.333%]">
                 <div className={cn(
                   "rounded-full bg-muted mb-2",
                   i === 1 ? "w-10 h-10" : "w-8 h-8",
                   isMobile && !isPortrait && i === 1 ? "w-8 h-8" : "w-6 h-6"
                 )} />
                 <div className={cn(
-                  "bg-muted rounded-xl mb-1.5",
-                  i === 1 ? "w-16 h-6" : "w-12 h-5",
-                  isMobile && !isPortrait && i === 1 ? "w-12 h-5" : "w-10 h-4"
+                  "bg-muted rounded-xl mb-1.5 w-full",
+                  i === 1 ? "h-6" : "h-5",
+                  isMobile && !isPortrait && i === 1 ? "h-5" : "h-4"
                 )} />
                 <div className={cn(
-                  "bg-muted rounded",
-                  isMobile ? "w-8 h-2" : "w-12 h-3",
-                  isMobile && !isPortrait && "w-6 h-2"
+                  "bg-muted rounded w-full",
+                  isMobile ? "h-2" : "h-3",
+                  isMobile && !isPortrait && "h-2"
                 )} />
               </div>
             ))}
@@ -535,10 +535,10 @@ const Dashboard = () => {
     if (leaderboardError) {
       return (
         <div className={cn(
-          "py-4 text-center",
+          "py-4 text-center w-full",
           isMobile && "py-3"
         )}>
-          <p className="text-destructive mb-2 text-xs sm:text-sm">{leaderboardError}</p>
+          <p className="text-destructive mb-2 text-xs sm:text-sm w-full">Failed to load leaderboard</p>
           <Button 
             variant="outline" 
             size="sm" 
@@ -556,15 +556,15 @@ const Dashboard = () => {
     if (top3.length === 0) {
       return (
         <div className={cn(
-          "py-4 text-center",
+          "py-4 text-center w-full",
           isMobile && "py-3"
         )}>
           <Trophy className={cn(
             "mx-auto mb-3 text-muted-foreground opacity-50",
             isMobile ? "w-8 h-8" : "w-10 h-10"
           )} />
-          <p className="text-muted-foreground text-xs sm:text-sm">No leaderboard data</p>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-muted-foreground text-xs sm:text-sm w-full">No leaderboard data</p>
+          <p className="text-xs text-muted-foreground mt-1 w-full">
             Start completing habits to appear!
           </p>
         </div>
@@ -614,9 +614,9 @@ const Dashboard = () => {
     const podiumOrder = top3.length >= 3 ? [top3[1], top3[0], top3[2]] : top3;
 
     return (
-      <div className="space-y-3 sm:space-y-4">
+      <div className="space-y-3 sm:space-y-4 w-full">
         <div className={cn(
-          "flex items-end justify-center gap-2",
+          "flex items-end justify-center gap-2 w-full",
           isMobile && !isPortrait ? "gap-1" : "md:gap-4"
         )}>
           {podiumOrder.map((leader, index) => {
@@ -631,14 +631,13 @@ const Dashboard = () => {
               <div 
                 key={leader.id}
                 className={cn(
-                  "flex flex-col items-center",
+                  "flex flex-col items-center flex-1 max-w-[33.333%]",
                   actualIndex === 0 ? "order-2" : actualIndex === 1 ? "order-1" : "order-3"
                 )}
               >
                 <div className={cn(
                   "w-full rounded-t-lg mb-2 flex items-center justify-center",
                   height,
-                  isMobile ? "max-w-12 sm:max-w-16" : "max-w-16",
                   actualIndex === 0 
                     ? "bg-gradient-to-b from-yellow-500/30 to-yellow-500/10" 
                     : actualIndex === 1
@@ -650,9 +649,9 @@ const Dashboard = () => {
                   </div>
                 </div>
                 
-                <div className="text-center min-w-0 max-w-full">
+                <div className="text-center min-w-0 w-full px-1">
                   <h3 className={cn(
-                    "font-semibold truncate px-1",
+                    "font-semibold truncate",
                     isMobile ? "text-xs" : "text-sm",
                     isMobile && !isPortrait && "text-xs"
                   )}>
@@ -660,7 +659,7 @@ const Dashboard = () => {
                   </h3>
                   {leader.id === user?.id && (
                     <Badge variant="secondary" size="sm" className={cn(
-                      "mt-0.5 bg-primary/20 text-primary text-[10px] px-1 h-4",
+                      "mt-0.5 bg-primary/20 text-primary text-[10px] px-1 h-4 w-full",
                       isMobile && !isPortrait && "text-[9px] h-3"
                     )}>
                       You
@@ -677,7 +676,7 @@ const Dashboard = () => {
                     )}>{leader.total_streak || 0}</span>
                   </div>
                   <Badge variant="outline" className={cn(
-                    "mt-0.5 text-[10px] h-4",
+                    "mt-0.5 text-[10px] h-4 w-full",
                     isMobile ? "text-xs" : "text-sm",
                     isMobile && !isPortrait && "text-[9px] h-3"
                   )}>
@@ -692,18 +691,18 @@ const Dashboard = () => {
     );
   };
 
-  // User Stats Component with mobile sizing
+  // User Stats Component with mobile sizing - Fixed width
   const UserStats = () => {
     const currentUser = leaderboardData.find(u => u.id === user?.id);
     const userStreak = currentUser?.total_streak || dailyStats.streak;
     
     return (
       <div className={cn(
-        "mt-3 sm:mt-4 p-3 bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg border border-primary/20",
+        "mt-3 sm:mt-4 p-3 bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg border border-primary/20 w-full",
         isMobile && !isPortrait && "p-2"
       )}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             <div className={cn(
               "rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center flex-shrink-0",
               isMobile ? "w-8 h-8" : "w-10 h-10"
@@ -713,9 +712,9 @@ const Dashboard = () => {
                 isMobile ? "w-4 h-4" : "w-5 h-5"
               )} />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className={cn(
-                "text-muted-foreground truncate",
+                "text-muted-foreground truncate text-xs",
                 isMobile ? "text-xs" : "text-sm"
               )}>Your Rank</p>
               <p className={cn(
@@ -726,9 +725,9 @@ const Dashboard = () => {
               </p>
             </div>
           </div>
-          <div className="text-right min-w-0">
+          <div className="text-right min-w-0 flex-1">
             <p className={cn(
-              "text-muted-foreground truncate",
+              "text-muted-foreground truncate text-xs",
               isMobile ? "text-xs" : "text-sm"
             )}>Current Streak</p>
             <div className="flex items-center gap-1 justify-end">
@@ -747,8 +746,8 @@ const Dashboard = () => {
         </div>
         
         {userStreak === 0 && (
-          <div className="mt-2 pt-2 border-t border-primary/20">
-            <p className="text-xs text-muted-foreground text-center">
+          <div className="mt-2 pt-2 border-t border-primary/20 w-full">
+            <p className="text-xs text-muted-foreground text-center w-full">
               Complete habits to appear on the leaderboard!
             </p>
           </div>
@@ -757,15 +756,15 @@ const Dashboard = () => {
     );
   };
 
-  // Daily Stats Component - Fixed mobile sizing
+  // Daily Stats Component - Fixed width on mobile
   const DailyStatsCard = () => (
     <div className={cn(
-      "grid gap-2 mb-4",
+      "grid gap-2 mb-4 w-full",
       getStatsGridCols()
     )}>
-      <div className="bg-gradient-to-br from-green-500/10 to-green-500/5 rounded-lg p-2 border border-green-500/20">
-        <div className="flex items-center justify-between">
-          <div className="min-w-0">
+      <div className="bg-gradient-to-br from-green-500/10 to-green-500/5 rounded-lg p-2 border border-green-500/20 w-full">
+        <div className="flex items-center justify-between w-full">
+          <div className="min-w-0 flex-1">
             <p className="text-xs font-medium text-green-600 truncate">Completed</p>
             <p className="text-lg font-bold">{dailyStats.completed}</p>
           </div>
@@ -773,12 +772,12 @@ const Dashboard = () => {
             <CheckCircle className="w-3.5 h-3.5 text-green-500" />
           </div>
         </div>
-        <p className="text-[10px] text-muted-foreground mt-1 truncate">Of {dailyStats.total} total</p>
+        <p className="text-[10px] text-muted-foreground mt-1 truncate w-full">Of {dailyStats.total} total</p>
       </div>
 
-      <div className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 rounded-lg p-2 border border-blue-500/20">
-        <div className="flex items-center justify-between">
-          <div className="min-w-0">
+      <div className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 rounded-lg p-2 border border-blue-500/20 w-full">
+        <div className="flex items-center justify-between w-full">
+          <div className="min-w-0 flex-1">
             <p className="text-xs font-medium text-blue-600 truncate">Pending</p>
             <p className="text-lg font-bold">{dailyStats.pending}</p>
           </div>
@@ -786,12 +785,12 @@ const Dashboard = () => {
             <Clock className="w-3.5 h-3.5 text-blue-500" />
           </div>
         </div>
-        <p className="text-[10px] text-muted-foreground mt-1 truncate">Remaining today</p>
+        <p className="text-[10px] text-muted-foreground mt-1 truncate w-full">Remaining today</p>
       </div>
 
-      <div className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 rounded-lg p-2 border border-purple-500/20">
-        <div className="flex items-center justify-between">
-          <div className="min-w-0">
+      <div className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 rounded-lg p-2 border border-purple-500/20 w-full">
+        <div className="flex items-center justify-between w-full">
+          <div className="min-w-0 flex-1">
             <p className="text-xs font-medium text-purple-600 truncate">Streak</p>
             <p className="text-lg font-bold">{dailyStats.streak}</p>
           </div>
@@ -799,27 +798,27 @@ const Dashboard = () => {
             <Flame className="w-3.5 h-3.5 text-purple-500" />
           </div>
         </div>
-        <p className="text-[10px] text-muted-foreground mt-1 truncate">Consecutive days</p>
+        <p className="text-[10px] text-muted-foreground mt-1 truncate w-full">Consecutive days</p>
       </div>
     </div>
   );
 
-  // Loading Skeletons - Responsive
+  // Loading Skeletons - Responsive with fixed width
   const LoadingSkeleton = () => (
-    <div className="animate-pulse">
+    <div className="animate-pulse w-full">
       {/* Header Loading */}
-      <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+      <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50 w-full">
         <div className={cn(
           "container mx-auto",
           isMobile ? "px-3 py-3" : "px-4 py-4"
         )}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2 sm:gap-3 w-full">
               <div className={cn(
-                "bg-muted rounded-md",
+                "bg-muted rounded-md flex-shrink-0",
                 isMobile ? "w-8 h-8" : "w-10 h-10"
               )}></div>
-              <div className="hidden sm:block">
+              <div className="hidden sm:block w-full">
                 <div className="h-6 bg-muted rounded w-32 mb-1"></div>
                 <div className="h-3 bg-muted rounded w-24"></div>
               </div>
@@ -835,12 +834,12 @@ const Dashboard = () => {
       </div>
 
       <main className={cn(
-        "container mx-auto",
+        "container mx-auto w-full",
         getContainerPadding()
       )}>
         {/* Quick Actions Header Loading */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
-          <div className="space-y-2 min-w-0">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 w-full">
+          <div className="space-y-2 min-w-0 w-full">
             <div className={cn(
               "h-8 bg-muted rounded",
               isMobile ? "w-32" : "w-40"
@@ -858,13 +857,13 @@ const Dashboard = () => {
 
         {/* Daily Stats Loading */}
         <div className={cn(
-          "grid gap-2 mb-4",
+          "grid gap-2 mb-4 w-full",
           getStatsGridCols()
         )}>
           {[1, 2, 3].map((item) => (
-            <div key={item} className="bg-muted/30 rounded-lg p-2">
-              <div className="flex items-center justify-between">
-                <div className="min-w-0">
+            <div key={item} className="bg-muted/30 rounded-lg p-2 w-full">
+              <div className="flex items-center justify-between w-full">
+                <div className="min-w-0 flex-1">
                   <div className={cn(
                     "h-3 bg-muted rounded mb-1.5",
                     isMobile ? "w-10" : "w-12"
@@ -880,61 +879,61 @@ const Dashboard = () => {
                 )}></div>
               </div>
               <div className={cn(
-                "h-2.5 bg-muted rounded mt-1",
-                isMobile ? "w-12" : "w-14"
+                "h-2.5 bg-muted rounded mt-1 w-full",
+                isMobile ? "w-full" : "w-full"
               )}></div>
             </div>
           ))}
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-2 w-full">
           {/* Left Column Loading */}
-          <div className="space-y-4">
-            <div className="bg-card rounded-lg p-3">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-muted rounded"></div>
+          <div className="space-y-4 w-full">
+            <div className="bg-card rounded-lg p-3 w-full">
+              <div className="space-y-2 w-full">
+                <div className="flex items-center gap-2 w-full">
+                  <div className="w-4 h-4 bg-muted rounded flex-shrink-0"></div>
                   <div className={cn(
-                    "h-4 bg-muted rounded",
-                    isMobile ? "w-20" : "w-24"
+                    "h-4 bg-muted rounded w-full",
+                    isMobile ? "w-full" : "w-full"
                   )}></div>
                 </div>
                 <div className={cn(
-                  "h-3 bg-muted rounded",
-                    isMobile ? "w-32" : "w-36"
+                  "h-3 bg-muted rounded w-full",
+                    isMobile ? "w-full" : "w-full"
                 )}></div>
-                <div className="h-32 bg-muted/30 rounded-lg mt-3"></div>
+                <div className="h-32 bg-muted/30 rounded-lg mt-3 w-full"></div>
               </div>
             </div>
           </div>
 
           {/* Right Column Loading */}
-          <div className="space-y-4">
-            <div className="bg-card rounded-lg p-3">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-muted rounded"></div>
+          <div className="space-y-4 w-full">
+            <div className="bg-card rounded-lg p-3 w-full">
+              <div className="space-y-2 w-full">
+                <div className="flex items-center gap-2 w-full">
+                  <div className="w-4 h-4 bg-muted rounded flex-shrink-0"></div>
                   <div className={cn(
-                    "h-4 bg-muted rounded",
-                    isMobile ? "w-28" : "w-32"
+                    "h-4 bg-muted rounded w-full",
+                    isMobile ? "w-full" : "w-full"
                   )}></div>
                 </div>
                 <div className={cn(
-                  "h-3 bg-muted rounded",
-                  isMobile ? "w-20" : "w-24"
+                  "h-3 bg-muted rounded w-full",
+                  isMobile ? "w-full" : "w-full"
                 )}></div>
-                <div className="flex items-end justify-center gap-2 py-4">
+                <div className="flex items-end justify-center gap-2 py-4 w-full">
                   {[2, 1, 3].map((i) => (
-                    <div key={i} className="flex flex-col items-center">
+                    <div key={i} className="flex flex-col items-center flex-1 max-w-[33.333%]">
                       <div className={cn(
-                        "rounded-full bg-muted mb-2",
-                        i === 1 ? "w-10 h-10" : "w-8 h-8"
+                        "rounded-full bg-muted mb-2 w-full",
+                        i === 1 ? "h-10" : "h-8"
                       )} />
                       <div className={cn(
-                        "bg-muted rounded-xl mb-1.5",
-                        i === 1 ? "w-16 h-6" : "w-12 h-5"
+                        "bg-muted rounded-xl mb-1.5 w-full",
+                        i === 1 ? "h-6" : "h-5"
                       )} />
-                      <div className="bg-muted rounded w-10 h-2.5" />
+                      <div className="bg-muted rounded w-full h-2.5" />
                     </div>
                   ))}
                 </div>
@@ -948,7 +947,7 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background w-full">
         <LoadingSkeleton />
       </div>
     );
@@ -969,12 +968,12 @@ const Dashboard = () => {
           isMobile && !isPortrait && "w-[320px]"
         )}
       >
-        <div className="flex flex-col h-full">
-          <div className="flex items-center gap-3 mb-6 sm:mb-8">
-            <div className="p-2 bg-gradient-to-br from-primary to-primary/80 rounded-lg">
+        <div className="flex flex-col h-full w-full">
+          <div className="flex items-center gap-3 mb-6 sm:mb-8 w-full">
+            <div className="p-2 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex-shrink-0">
               <Flame className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-br from-primary to-primary/80 bg-clip-text text-transparent truncate">
                 StreakMaster
               </h1>
@@ -982,7 +981,7 @@ const Dashboard = () => {
             </div>
           </div>
           
-          <div className="flex-1 space-y-2 sm:space-y-4">
+          <div className="flex-1 space-y-2 sm:space-y-4 w-full">
             <Button
               variant={activeTab === "overview" ? "secondary" : "ghost"}
               className="w-full justify-start text-sm sm:text-base"
@@ -1029,7 +1028,7 @@ const Dashboard = () => {
             </Button>
           </div>
           
-          <div className="pt-4 sm:pt-6 border-t">
+          <div className="pt-4 sm:pt-6 border-t w-full">
             <Button 
               variant="destructive" 
               className="w-full text-sm sm:text-base"
@@ -1052,7 +1051,7 @@ const Dashboard = () => {
     if (!isMobile || isPortrait) return null;
 
     return (
-      <div className="flex items-center justify-center mb-2">
+      <div className="flex items-center justify-center mb-2 w-full">
         <Button
           variant="ghost"
           size="sm"
@@ -1076,13 +1075,13 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 w-full">
       <header className={cn(
-        "border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50 transition-all duration-300",
+        "border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50 transition-all duration-300 w-full",
         isMobile && !isPortrait && isCollapsed ? "h-0 border-0 overflow-hidden" : "py-2 sm:py-4"
       )}>
-        <div className="container mx-auto px-3 sm:px-4">
-          <div className="flex items-center justify-between">
+        <div className="container mx-auto px-3 sm:px-4 w-full">
+          <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2 sm:gap-3">
               <MobileNavigation />
               <div className={cn(
@@ -1116,24 +1115,24 @@ const Dashboard = () => {
       <CollapsibleHeader />
 
       <main className={cn(
-        "container mx-auto",
+        "container mx-auto w-full",
         getContainerPadding()
       )}>
         {/* Dashboard Header */}
         <div className={cn(
-          "flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 mb-4",
+          "flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 mb-4 w-full",
           isMobile && !isPortrait && "flex-row items-center mb-3"
         )}>
           <div className={cn(
-            "min-w-0",
+            "min-w-0 w-full",
             isMobile && !isPortrait && "flex-1"
           )}>
             <h1 className={cn(
-              "font-bold tracking-tight truncate",
+              "font-bold tracking-tight truncate w-full",
               isMobile && !isPortrait ? "text-lg" : "text-xl sm:text-2xl"
             )}>Dashboard</h1>
             <p className={cn(
-              "text-muted-foreground truncate",
+              "text-muted-foreground truncate w-full",
               isMobile && !isPortrait ? "text-xs" : "text-sm"
             )}>
               Track your progress and build better habits
@@ -1159,41 +1158,41 @@ const Dashboard = () => {
         {/* Daily Stats */}
         <DailyStatsCard />
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 w-full">
           {/* Desktop Tabs */}
           <TabsList className={cn(
-            "hidden sm:grid gap-2 p-1 bg-muted/50 rounded-lg",
+            "hidden sm:grid gap-2 p-1 bg-muted/50 rounded-lg w-full",
             isTablet ? "grid-cols-2" : "grid-cols-2 lg:grid-cols-4"
           )}>
-            <TabsTrigger value="overview" className="flex items-center gap-2">
+            <TabsTrigger value="overview" className="flex items-center gap-2 w-full">
               <BarChart3 className="w-4 h-4" />
               <span className={cn(isTablet && "hidden lg:inline")}>Overview</span>
             </TabsTrigger>
-            <TabsTrigger value="habits" className="flex items-center gap-2">
+            <TabsTrigger value="habits" className="flex items-center gap-2 w-full">
               <List className="w-4 h-4" />
               <span className={cn(isTablet && "hidden lg:inline")}>My Habits</span>
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
+            <TabsTrigger value="analytics" className="flex items-center gap-2 w-full">
               <Target className="w-4 h-4" />
               <span className={cn(isTablet && "hidden lg:inline")}>Analytics</span>
             </TabsTrigger>
-            <TabsTrigger value="leaderboard" className="flex items-center gap-2">
+            <TabsTrigger value="leaderboard" className="flex items-center gap-2 w-full">
               <Trophy className="w-4 h-4" />
               <span className={cn(isTablet && "hidden lg:inline")}>Leaderboard</span>
             </TabsTrigger>
           </TabsList>
 
           {/* Mobile Tab Switcher */}
-          <div className="sm:hidden">
+          <div className="sm:hidden w-full">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="w-full justify-between h-9 text-sm">
-                  <div className="flex items-center gap-2">
-                    {activeTab === "overview" && <BarChart3 className="w-3.5 h-3.5" />}
-                    {activeTab === "habits" && <List className="w-3.5 h-3.5" />}
-                    {activeTab === "analytics" && <Target className="w-3.5 h-3.5" />}
-                    {activeTab === "leaderboard" && <Trophy className="w-3.5 h-3.5" />}
-                    <span className="capitalize text-sm truncate">
+                  <div className="flex items-center gap-2 w-full">
+                    {activeTab === "overview" && <BarChart3 className="w-3.5 h-3.5 flex-shrink-0" />}
+                    {activeTab === "habits" && <List className="w-3.5 h-3.5 flex-shrink-0" />}
+                    {activeTab === "analytics" && <Target className="w-3.5 h-3.5 flex-shrink-0" />}
+                    {activeTab === "leaderboard" && <Trophy className="w-3.5 h-3.5 flex-shrink-0" />}
+                    <span className="capitalize text-sm truncate flex-1 text-left">
                       {activeTab === "overview" && "Overview"}
                       {activeTab === "habits" && "My Habits"}
                       {activeTab === "analytics" && "Analytics"}
@@ -1204,19 +1203,19 @@ const Dashboard = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-[calc(100vw-2rem)]">
-                <DropdownMenuItem onClick={() => setActiveTab("overview")} className="text-sm">
+                <DropdownMenuItem onClick={() => setActiveTab("overview")} className="text-sm w-full">
                   <BarChart3 className="w-3.5 h-3.5 mr-2" />
                   Overview
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setActiveTab("habits")} className="text-sm">
+                <DropdownMenuItem onClick={() => setActiveTab("habits")} className="text-sm w-full">
                   <List className="w-3.5 h-3.5 mr-2" />
                   My Habits
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setActiveTab("analytics")} className="text-sm">
+                <DropdownMenuItem onClick={() => setActiveTab("analytics")} className="text-sm w-full">
                   <Target className="w-3.5 h-3.5 mr-2" />
                   Analytics
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setActiveTab("leaderboard")} className="text-sm">
+                <DropdownMenuItem onClick={() => setActiveTab("leaderboard")} className="text-sm w-full">
                   <Trophy className="w-3.5 h-3.5 mr-2" />
                   Leaderboard
                 </DropdownMenuItem>
@@ -1225,17 +1224,17 @@ const Dashboard = () => {
           </div>
 
           {/* Overview Tab - Now with real data */}
-          <TabsContent value="overview" className="space-y-4">
+          <TabsContent value="overview" className="space-y-4 w-full">
             <div className={cn(
-              "grid gap-4",
+              "grid gap-4 w-full",
               isMobile && !isPortrait ? "grid-cols-1" : "lg:grid-cols-2"
             )}>
               {/* Left Column - Progress & Analytics */}
-              <div className="space-y-4">
-                <Card className={cn(getCardPadding())}>
-                  <CardHeader className={cn("pb-2", getCardHeaderPadding())}>
+              <div className="space-y-4 w-full">
+                <Card className={cn("w-full", getCardPadding())}>
+                  <CardHeader className={cn("pb-2 w-full", getCardHeaderPadding())}>
                     <CardTitle className={cn(
-                      "flex items-center gap-1.5",
+                      "flex items-center gap-1.5 w-full",
                       isMobile ? "text-base" : "text-lg"
                     )}>
                       <BarChart3 className={cn(
@@ -1244,55 +1243,56 @@ const Dashboard = () => {
                       Today's Progress
                     </CardTitle>
                     <CardDescription className={cn(
-                      isMobile ? "text-xs" : "text-sm"
+                      isMobile ? "text-xs" : "text-sm",
+                      "w-full"
                     )}>
                       Your completion rate for today
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className={getCardContentPadding()}>
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <div>
+                  <CardContent className={cn("w-full", getCardContentPadding())}>
+                    <div className="space-y-4 w-full">
+                      <div className="w-full">
+                        <div className="flex items-center justify-between mb-2 w-full">
+                          <div className="flex-1">
                             <span className="text-sm font-medium">Daily Completion</span>
                             <p className="text-xs text-muted-foreground">
                               {dailyStats.completed} of {dailyStats.total} habits completed
                             </p>
                           </div>
                           <span className={cn(
-                            "font-bold",
+                            "font-bold flex-shrink-0 ml-2",
                             isMobile ? "text-lg" : "text-xl"
                           )}>{dailyStats.completionRate}%</span>
                         </div>
-                        <Progress value={dailyStats.completionRate} className="h-2" />
+                        <Progress value={dailyStats.completionRate} className="h-2 w-full" />
                       </div>
                       
-                      <Separator className="my-2" />
+                      <Separator className="my-2 w-full" />
 
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="bg-muted/20 rounded-lg p-3">
-                          <div className="flex items-center gap-1.5 mb-1.5">
-                            <Activity className="w-3.5 h-3.5 text-primary" />
-                            <span className="text-xs font-medium">Active Habits</span>
+                      <div className="grid grid-cols-2 gap-3 w-full">
+                        <div className="bg-muted/20 rounded-lg p-3 w-full">
+                          <div className="flex items-center gap-1.5 mb-1.5 w-full">
+                            <Activity className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                            <span className="text-xs font-medium truncate">Active Habits</span>
                           </div>
-                          <p className="text-xl font-bold">{dailyStats.total}</p>
+                          <p className="text-xl font-bold w-full">{dailyStats.total}</p>
                         </div>
-                        <div className="bg-muted/20 rounded-lg p-3">
-                          <div className="flex items-center gap-1.5 mb-1.5">
-                            <TrendingUpIcon className="w-3.5 h-3.5 text-primary" />
-                            <span className="text-xs font-medium">Best Streak</span>
+                        <div className="bg-muted/20 rounded-lg p-3 w-full">
+                          <div className="flex items-center gap-1.5 mb-1.5 w-full">
+                            <TrendingUpIcon className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                            <span className="text-xs font-medium truncate">Best Streak</span>
                           </div>
-                          <p className="text-xl font-bold">{dailyStats.bestStreak} days</p>
+                          <p className="text-xl font-bold w-full">{dailyStats.bestStreak} days</p>
                         </div>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className={cn(getCardPadding())}>
-                  <CardHeader className={cn("pb-2", getCardHeaderPadding())}>
+                <Card className={cn("w-full", getCardPadding())}>
+                  <CardHeader className={cn("pb-2 w-full", getCardHeaderPadding())}>
                     <CardTitle className={cn(
-                      "flex items-center gap-1.5",
+                      "flex items-center gap-1.5 w-full",
                       isMobile ? "text-base" : "text-lg"
                     )}>
                       <Calendar className={cn(
@@ -1301,14 +1301,16 @@ const Dashboard = () => {
                       Weekly Progress
                     </CardTitle>
                     <CardDescription className={cn(
-                      isMobile ? "text-xs" : "text-sm"
+                      isMobile ? "text-xs" : "text-sm",
+                      "w-full"
                     )}>
                       Your streak performance this week
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className={getCardContentPadding()}>
-                    <div className="space-y-4">
-                      <div>
+                  <CardContent className={cn("w-full", getCardContentPadding())}>
+                    <div className="space-y-4 w-full">
+                      <div className="w-full">
+                        <p className="text-sm font-medium mb-2 w-full">Daily habit completion rate</p>
                         <WeeklyStreakChart 
                           userId={user?.id} 
                           refreshTrigger={refreshTrigger}
@@ -1316,16 +1318,16 @@ const Dashboard = () => {
                         />
                       </div>
                       
-                      <div className="text-xs text-muted-foreground">
-                        <p className="font-medium mb-1.5">Weekly Insights</p>
-                        <ul className="space-y-1">
-                          <li className="flex items-center gap-1.5">
-                            <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                            <span>Most productive day: {weeklyInsights.mostProductiveDay || "No data yet"}</span>
+                      <div className="text-xs text-muted-foreground w-full">
+                        <p className="font-medium mb-1.5 w-full">Weekly Insights</p>
+                        <ul className="space-y-1 w-full">
+                          <li className="flex items-center gap-1.5 w-full">
+                            <div className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0"></div>
+                            <span className="truncate">Most productive day: {weeklyInsights.mostProductiveDay || "No data yet"}</span>
                           </li>
-                          <li className="flex items-center gap-1.5">
-                            <div className="w-1.5 h-1.5 rounded-full bg-yellow-500"></div>
-                            <span>Average daily completion: {weeklyInsights.averageCompletion}%</span>
+                          <li className="flex items-center gap-1.5 w-full">
+                            <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 flex-shrink-0"></div>
+                            <span className="truncate">Average daily completion: {weeklyInsights.averageCompletion}%</span>
                           </li>
                         </ul>
                       </div>
@@ -1335,11 +1337,11 @@ const Dashboard = () => {
               </div>
 
               {/* Right Column - Leaderboard & Activity */}
-              <div className="space-y-4">
-                <Card className={cn(getCardPadding())}>
-                  <CardHeader className={cn("pb-2", getCardHeaderPadding())}>
+              <div className="space-y-4 w-full">
+                <Card className={cn("w-full", getCardPadding())}>
+                  <CardHeader className={cn("pb-2 w-full", getCardHeaderPadding())}>
                     <CardTitle className={cn(
-                      "flex items-center gap-1.5",
+                      "flex items-center gap-1.5 w-full",
                       isMobile ? "text-base" : "text-lg"
                     )}>
                       <Trophy className={cn(
@@ -1348,21 +1350,22 @@ const Dashboard = () => {
                       Top Performers
                     </CardTitle>
                     <CardDescription className={cn(
-                      isMobile ? "text-xs" : "text-sm"
+                      isMobile ? "text-xs" : "text-sm",
+                      "w-full"
                     )}>
                       Leaderboard podium
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className={getCardContentPadding()}>
+                  <CardContent className={cn("w-full", getCardContentPadding())}>
                     <TopThreePodium />
                     <UserStats />
                   </CardContent>
                 </Card>
 
-                <Card className={cn(getCardPadding())}>
-                  <CardHeader className={cn("pb-2", getCardHeaderPadding())}>
+                <Card className={cn("w-full", getCardPadding())}>
+                  <CardHeader className={cn("pb-2 w-full", getCardHeaderPadding())}>
                     <CardTitle className={cn(
-                      "flex items-center gap-1.5",
+                      "flex items-center gap-1.5 w-full",
                       isMobile ? "text-base" : "text-lg"
                     )}>
                       <Activity className={cn(
@@ -1371,19 +1374,20 @@ const Dashboard = () => {
                       Recent Activity
                     </CardTitle>
                     <CardDescription className={cn(
-                      isMobile ? "text-xs" : "text-sm"
+                      isMobile ? "text-xs" : "text-sm",
+                      "w-full"
                     )}>
-                      Your latest habit completions and achievements
+                      Your latest habit completions
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className={getCardContentPadding()}>
+                  <CardContent className={cn("w-full", getCardContentPadding())}>
                     <RecentActivity 
                       userId={user?.id} 
                       refreshTrigger={refreshTrigger}
                       compact={isMobile}
                     />
                     
-                    <div className="mt-3 pt-3 border-t">
+                    <div className="mt-3 pt-3 border-t w-full">
                       <Button 
                         variant="outline" 
                         size="sm" 
@@ -1400,11 +1404,11 @@ const Dashboard = () => {
           </TabsContent>
 
           {/* Other Tabs with real data */}
-          <TabsContent value="habits" className="space-y-4">
-            <Card className={cn(getCardPadding())}>
-              <CardHeader className={getCardHeaderPadding()}>
+          <TabsContent value="habits" className="space-y-4 w-full">
+            <Card className={cn("w-full", getCardPadding())}>
+              <CardHeader className={cn("w-full", getCardHeaderPadding())}>
                 <CardTitle className={cn(
-                  "flex items-center gap-1.5",
+                  "flex items-center gap-1.5 w-full",
                   isMobile ? "text-base" : "text-lg"
                 )}>
                   <List className={cn(
@@ -1413,14 +1417,15 @@ const Dashboard = () => {
                   Your Habits ({habits.length})
                 </CardTitle>
                 <CardDescription className={cn(
-                  isMobile ? "text-xs" : "text-sm"
+                  isMobile ? "text-xs" : "text-sm",
+                  "w-full"
                 )}>
                   Manage and track all your habits in one place
                 </CardDescription>
               </CardHeader>
-              <CardContent className={getCardContentPadding()}>
+              <CardContent className={cn("w-full", getCardContentPadding())}>
                 {habitsLoading ? (
-                  <div className="flex justify-center items-center py-8">
+                  <div className="flex justify-center items-center py-8 w-full">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                   </div>
                 ) : (
@@ -1436,12 +1441,12 @@ const Dashboard = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="analytics" className="space-y-4">
-            <div className="grid gap-4">
-              <Card className={cn(getCardPadding())}>
-                <CardHeader className={getCardHeaderPadding()}>
+          <TabsContent value="analytics" className="space-y-4 w-full">
+            <div className="grid gap-4 w-full">
+              <Card className={cn("w-full", getCardPadding())}>
+                <CardHeader className={cn("w-full", getCardHeaderPadding())}>
                   <CardTitle className={cn(
-                    "flex items-center gap-1.5",
+                    "flex items-center gap-1.5 w-full",
                     isMobile ? "text-base" : "text-lg"
                   )}>
                     <BarChart3 className={cn(
@@ -1450,12 +1455,13 @@ const Dashboard = () => {
                     Detailed Analytics
                   </CardTitle>
                   <CardDescription className={cn(
-                    isMobile ? "text-xs" : "text-sm"
+                    isMobile ? "text-xs" : "text-sm",
+                    "w-full"
                   )}>
                     Comprehensive view of your habit performance
                   </CardDescription>
                 </CardHeader>
-                <CardContent className={getCardContentPadding()}>
+                <CardContent className={cn("w-full", getCardContentPadding())}>
                   <WeeklyStreakChart 
                     userId={user?.id} 
                     refreshTrigger={refreshTrigger} 
@@ -1465,10 +1471,10 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
 
-              <Card className={cn(getCardPadding())}>
-                <CardHeader className={getCardHeaderPadding()}>
+              <Card className={cn("w-full", getCardPadding())}>
+                <CardHeader className={cn("w-full", getCardHeaderPadding())}>
                   <CardTitle className={cn(
-                    "flex items-center gap-1.5",
+                    "flex items-center gap-1.5 w-full",
                     isMobile ? "text-base" : "text-lg"
                   )}>
                     <Calendar className={cn(
@@ -1477,12 +1483,13 @@ const Dashboard = () => {
                     Weekly Streak Details
                   </CardTitle>
                   <CardDescription className={cn(
-                    isMobile ? "text-xs" : "text-sm"
+                    isMobile ? "text-xs" : "text-sm",
+                    "w-full"
                   )}>
                     Day-by-day breakdown of your progress
                   </CardDescription>
                 </CardHeader>
-                <CardContent className={getCardContentPadding()}>
+                <CardContent className={cn("w-full", getCardContentPadding())}>
                   <WeeklyStreakTable 
                     userId={user?.id} 
                     refreshTrigger={refreshTrigger}
@@ -1493,11 +1500,11 @@ const Dashboard = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="leaderboard" className="space-y-4">
-            <Card className={cn(getCardPadding())}>
-              <CardHeader className={getCardHeaderPadding()}>
+          <TabsContent value="leaderboard" className="space-y-4 w-full">
+            <Card className={cn("w-full", getCardPadding())}>
+              <CardHeader className={cn("w-full", getCardHeaderPadding())}>
                 <CardTitle className={cn(
-                  "flex items-center gap-1.5",
+                  "flex items-center gap-1.5 w-full",
                   isMobile ? "text-base" : "text-lg"
                 )}>
                   <Trophy className={cn(
@@ -1506,12 +1513,13 @@ const Dashboard = () => {
                   Global Leaderboard
                 </CardTitle>
                 <CardDescription className={cn(
-                  isMobile ? "text-xs" : "text-sm"
+                  isMobile ? "text-xs" : "text-sm",
+                  "w-full"
                 )}>
                   Compete with others and stay motivated
                 </CardDescription>
               </CardHeader>
-              <CardContent className={getCardContentPadding()}>
+              <CardContent className={cn("w-full", getCardContentPadding())}>
                 <Leaderboard 
                   currentUserId={user?.id} 
                   refreshTrigger={refreshTrigger}
@@ -1521,33 +1529,35 @@ const Dashboard = () => {
             </Card>
 
             <div className={cn(
-              "grid gap-4",
+              "grid gap-4 w-full",
               isMobile && !isPortrait ? "grid-cols-1" : "lg:grid-cols-2"
             )}>
-              <Card className={cn(getCardPadding())}>
-                <CardHeader className={getCardHeaderPadding()}>
+              <Card className={cn("w-full", getCardPadding())}>
+                <CardHeader className={cn("w-full", getCardHeaderPadding())}>
                   <CardTitle className={cn(
+                    "text-base w-full",
                     isMobile ? "text-base" : "text-lg"
                   )}>Your Ranking</CardTitle>
                   <CardDescription className={cn(
-                    isMobile ? "text-xs" : "text-sm"
+                    isMobile ? "text-xs" : "text-sm",
+                    "w-full"
                   )}>
                     See how you compare to others
                   </CardDescription>
                 </CardHeader>
-                <CardContent className={getCardContentPadding()}>
-                  <div className="text-center py-4 sm:py-6">
+                <CardContent className={cn("w-full", getCardContentPadding())}>
+                  <div className="text-center py-4 sm:py-6 w-full">
                     <Trophy className={cn(
                       "mx-auto mb-3 text-warning",
                       isMobile ? "w-8 h-8" : "w-10 h-10"
                     )} />
                     <p className={cn(
-                      "font-bold text-warning",
+                      "font-bold text-warning w-full",
                       isMobile ? "text-xl" : "text-2xl"
                     )}>
                       {userRank ? `#${userRank}` : 'Unranked'}
                     </p>
-                    <p className="text-muted-foreground mt-1.5 text-xs sm:text-sm">
+                    <p className="text-muted-foreground mt-1.5 text-xs sm:text-sm w-full">
                       {userRank && userRank <= 3 ? "You're in the top 3! 🎉" : 
                        userRank && userRank <= 10 ? "You're in the top 10! 🎉" : 
                        dailyStats.streak > 0 ? "Keep going to climb the ranks!" : "Start completing habits to appear on the leaderboard!"}
@@ -1556,34 +1566,36 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
 
-              <Card className={cn(getCardPadding())}>
-                <CardHeader className={getCardHeaderPadding()}>
+              <Card className={cn("w-full", getCardPadding())}>
+                <CardHeader className={cn("w-full", getCardHeaderPadding())}>
                   <CardTitle className={cn(
+                    "text-base w-full",
                     isMobile ? "text-base" : "text-lg"
                   )}>Streak Stats</CardTitle>
                   <CardDescription className={cn(
-                    isMobile ? "text-xs" : "text-sm"
+                    isMobile ? "text-xs" : "text-sm",
+                    "w-full"
                   )}>
                     Your personal streak achievements
                   </CardDescription>
                 </CardHeader>
-                <CardContent className={getCardContentPadding()}>
-                  <div className="space-y-4 py-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Current Streak</span>
-                      <span className="font-bold text-lg">{dailyStats.streak} days</span>
+                <CardContent className={cn("w-full", getCardContentPadding())}>
+                  <div className="space-y-4 py-2 w-full">
+                    <div className="flex items-center justify-between w-full">
+                      <span className="text-sm truncate flex-1">Current Streak</span>
+                      <span className="font-bold text-lg flex-shrink-0 ml-2">{dailyStats.streak} days</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Best Streak</span>
-                      <span className="font-bold text-lg">{dailyStats.bestStreak} days</span>
+                    <div className="flex items-center justify-between w-full">
+                      <span className="text-sm truncate flex-1">Best Streak</span>
+                      <span className="font-bold text-lg flex-shrink-0 ml-2">{dailyStats.bestStreak} days</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Total Habits</span>
-                      <span className="font-bold text-lg">{dailyStats.total}</span>
+                    <div className="flex items-center justify-between w-full">
+                      <span className="text-sm truncate flex-1">Total Habits</span>
+                      <span className="font-bold text-lg flex-shrink-0 ml-2">{dailyStats.total}</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Today's Progress</span>
-                      <span className="font-bold text-lg">{dailyStats.completionRate}%</span>
+                    <div className="flex items-center justify-between w-full">
+                      <span className="text-sm truncate flex-1">Today's Progress</span>
+                      <span className="font-bold text-lg flex-shrink-0 ml-2">{dailyStats.completionRate}%</span>
                     </div>
                   </div>
                 </CardContent>
