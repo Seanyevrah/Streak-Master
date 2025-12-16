@@ -98,11 +98,6 @@ export const ProfileIcon = ({ user, onSignOut }: ProfileIconProps) => {
     return parts.map(part => part.charAt(0).toUpperCase()).join('').slice(0, 2);
   };
 
-  const handleViewLeaderboard = () => {
-    // You can implement navigation to leaderboard or show in modal
-    toast.info("Navigate to leaderboard tab");
-  };
-
   const handleViewProfile = () => {
     // You can implement a profile page or modal
     toast.info("Profile page coming soon!");
@@ -131,11 +126,8 @@ export const ProfileIcon = ({ user, onSignOut }: ProfileIconProps) => {
             <p className="text-sm font-medium leading-none">
               {profileData?.username || user.email?.split('@')[0] || "User"}
             </p>
-            <p className="text-xs leading-none text-muted-foreground">
-              {user.email}
-            </p>
             {profileData?.total_streak !== undefined && (
-              <div className="flex items-center gap-2 pt-1">
+              <div className="flex items-center gap-2 pt-2">
                 <Badge variant="secondary" className="text-xs">
                   <Trophy className="w-3 h-3 mr-1" />
                   {profileData.total_streak} streak
@@ -155,11 +147,6 @@ export const ProfileIcon = ({ user, onSignOut }: ProfileIconProps) => {
         <DropdownMenuItem onClick={handleViewProfile}>
           <UserIcon className="mr-2 h-4 w-4" />
           <span>Profile</span>
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem onClick={handleViewLeaderboard}>
-          <Trophy className="mr-2 h-4 w-4" />
-          <span>Leaderboard</span>
         </DropdownMenuItem>
         
         <DropdownMenuItem disabled>
