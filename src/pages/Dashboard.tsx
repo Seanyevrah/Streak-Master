@@ -1603,12 +1603,8 @@ const Dashboard = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className={cn("w-full", getCardContentPadding())}>
-                    <div className="space-y-3 w-full">
+                    <div className="space-y-0.5 w-full">
                       <div className="w-full">
-                        <p className={cn(
-                          "font-medium mb-1 sm:mb-2 truncate w-full",
-                          isCompactMode ? "text-xs" : "text-sm"
-                        )}>Daily habit completion rate</p>
                         <WeeklyStreakChart 
                           userId={user?.id} 
                           refreshTrigger={refreshTrigger}
