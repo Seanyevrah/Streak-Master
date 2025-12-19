@@ -488,7 +488,6 @@ export const RecentActivity = ({ userId, refreshTrigger }: RecentActivityProps) 
 
         {/* Activity Legend */}
         <div className="mt-3 pt-3 border-t">
-          <p className="text-xs text-muted-foreground mb-2">LEGEND</p>
           <div className="flex flex-wrap gap-2 text-xs">
             <div className="flex items-center gap-1">
               <div className="w-3 h-3 rounded-full bg-green-500/20 flex items-center justify-center text-green-600 text-xs">✓</div>
