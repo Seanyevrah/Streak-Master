@@ -1133,10 +1133,6 @@ const Dashboard = () => {
               )}>
                 StreakMaster
               </h1>
-              <p className={cn(
-                "text-muted-foreground truncate",
-                isCompactMode ? "text-xs" : "text-sm"
-              )}>Completion Habits Tracking</p>
             </div>
           </div>
           
@@ -1301,10 +1297,6 @@ const Dashboard = () => {
                 )}>
                   StreakMaster
                 </h1>
-                <p className={cn(
-                  "text-muted-foreground truncate",
-                  isCompactMode ? "text-xs" : "text-sm"
-                )}>Completion Habits Tracking</p>
               </div>
             </div>
             
